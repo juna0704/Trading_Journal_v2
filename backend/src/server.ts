@@ -1,4 +1,5 @@
 import app from "./app";
+import { connectDatabase, disconnectDatabase } from "./config";
 import env from "./config/env";
 import logger from "./config/logger";
 
@@ -8,6 +9,9 @@ let server: any;
 
 const startServer = async () => {
   try {
+    // Connection to database
+    await connectDatabase();
+
     server = app.listen(PORT, () => {
       logger.info(`🚀 Server is running on port ${PORT}`);
       logger.info(`📝 Environment: ${env.NOD_ENV}`);
@@ -20,17 +24,27 @@ const startServer = async () => {
 };
 
 // Graceful shutdown
-const gracefulShutdown = (signal: string) => {
+const gracefulShutdown = async (signal: string) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
 
   if (!server) {
     logger.warn("Server not initialized. Exiting process");
   }
 
-  server.close(() => {
-    logger.info("HTTP server closed");
-    process.exit(0);
-  });
+  if (server) {
+    server.close(async () => {
+      logger.info("HTTP server closed");
+
+      try {
+        await disconnectDatabase();
+        logger.info("Database disconnected");
+        process.exit(0);
+      } catch (error) {
+        logger.error("Error during shutdown:", error);
+        process.exit(1);
+      }
+    });
+  }
 
   // Force exit after 10 seconds
   setTimeout(() => {
