@@ -1,5 +1,6 @@
 import app from "./app";
 import env from "./config/env";
+import logger from "./config/logger";
 
 const PORT = env.PORT || 5000;
 
@@ -8,12 +9,53 @@ let server: any;
 const startServer = async () => {
   try {
     server = app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
+      logger.info(`🚀 Server is running on port ${PORT}`);
+      logger.info(`📝 Environment: ${env.NOD_ENV}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
     });
   } catch (error) {
-    console.log("Failed to start server", error);
+    logger.error("Failed to start server", error);
     process.exit(1);
   }
 };
+
+// Graceful shutdown
+const gracefulShutdown = (signal: string) => {
+  logger.info(`${signal} received. Starting graceful shutdown...`);
+
+  if (!server) {
+    logger.warn("Server not initialized. Exiting process");
+  }
+
+  server.close(() => {
+    logger.info("HTTP server closed");
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    logger.error("Forced shutdown after timeout");
+    process.exit(1);
+  }, 10_000);
+};
+
+/**
+ * OS signals
+ */
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+/**
+ * Runtime errors
+ */
+process.on("uncaughtException", (error: Error) => {
+  logger.error("Uncaught Exception", error);
+  gracefulShutdown("uncaughtException");
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled Rejection", reason as Error);
+  gracefulShutdown("unhandledRejection");
+});
 
 startServer();
