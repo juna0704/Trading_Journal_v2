@@ -8,10 +8,17 @@ const envSchema = z.object({
   PORT: z.string().transform(Number).default(5000),
 
   // Database
-  // DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().url(),
 
   // Redis
-  // REDIS_URL: z.string().url(),
+  REDIS_URL: z.string().url(),
+
+  // CORS ORIGIN
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+
+  // Rate Limit
+  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default(900000), // 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default(100),
 });
 
 export type Env = z.infer<typeof envSchema>;
