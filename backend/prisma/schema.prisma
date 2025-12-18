@@ -8,34 +8,30 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
-  
 }
 
-
-
 model User {
-  id                        String   @id @default(uuid())
-  email                     String   @unique
-  password                  String
-  firstName                 String?  @map("first_name")
-  lastName                  String?  @map("last_name")
-  isEmailVerified           Boolean   @default(false)
-  emailVerificationToken    String?
-  emailVerificationExpires  DateTime?
-  passwordResetToken        String?
-  passwordResetExpires      DateTime?
-  role                      Role     @default(USER)
-  isActive                  Boolean  @default(true) @map("is_active")
-  lastLoginAt               DateTime?
-  createdAt                 DateTime @default(now()) @map("created_at")
-  updatedAt                 DateTime @updatedAt @map("updated_at")
+  id                       String    @id @default(uuid())
+  email                    String    @unique
+  password                 String
+  firstName                String?   @map("first_name")
+  lastName                 String?   @map("last_name")
+  isEmailVerified          Boolean   @default(false)
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+  role                     Role      @default(USER)
+  isActive                 Boolean   @default(true) @map("is_active")
+  lastLoginAt              DateTime?
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
 
-  refreshTokens             RefreshToken[]
-  trades                    Trade[]
+  refreshTokens RefreshToken[]
+  trades        Trade[]
 
-  @@map("users")
   @@index([email])
+  @@map("users")
 }
 
 enum Role {
@@ -45,37 +41,37 @@ enum Role {
 }
 
 model RefreshToken {
-  id                        String   @id @default(cuid())
-  token                     String   @unique
-  userId                    String
-  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt                 DateTime
-  createdAt                 DateTime @default(now())
-  isRevoked                 Boolean  @default(false)
-  
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  isRevoked Boolean  @default(false)
+
   @@index([userId])
   @@index([token])
   @@map("refresh_tokens")
 }
 
 model Trade {
-  id                        String   @id @default(cuid())
-  userId                    String
-  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  symbol                    String
-  type                      String   // BUY, SELL
-  quantity                  Float
-  entryPrice                Float
-  exitPrice                 Float?
-  entryDate                 DateTime
-  exitDate                  DateTime?
-  status                    String   // OPEN, CLOSED
-  profitLoss                Float?
-  notes                     String?
-  screenshotUrl             String?
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-  
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol        String
+  type          String // BUY, SELL
+  quantity      Float
+  entryPrice    Float
+  exitPrice     Float?
+  entryDate     DateTime
+  exitDate      DateTime?
+  status        String // OPEN, CLOSED
+  profitLoss    Float?
+  notes         String?
+  screenshotUrl String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
   @@index([userId])
   @@index([symbol])
   @@index([status])
