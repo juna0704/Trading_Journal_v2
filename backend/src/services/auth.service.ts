@@ -56,6 +56,53 @@ export class AuthService {
     return { user, tokens };
   }
 
+  async login(data: LoginInput): Promise<{ user: User; tokens: AuthTokens }> {
+    // find user
+    const user = await prisma.user.findUnique({
+      where: { email: data.email.toLowerCase() },
+    });
+
+    if (!user) {
+      throw new AppError(
+        401,
+        "INVALID_CREDENTIALS",
+        "Invalid email or password"
+      );
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      throw new AppError(403, "ACCOUNT_DISABLED", "Account has been desiabled");
+    }
+
+    // Verify password
+    const isPasswordValid = await argon2.verify(user.password, data.password);
+
+    if (!isPasswordValid) {
+      throw new AppError(
+        401,
+        "INVALID_CREDENTIALS",
+        "Invalid email or password"
+      );
+    }
+
+    // Update last login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    // Generate token
+    const tokens = await this.generateTokens(user.id, user.email);
+
+    logger.info("User logged in", { userId: user.id, email: user.email });
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword as User, tokens };
+  }
+
   private async generateTokens(
     userId: string,
     email: string

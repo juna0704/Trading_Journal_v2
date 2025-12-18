@@ -1,5 +1,4 @@
 import { Response } from "express";
-// import { AuthRequest, ApiResponse } from "../types";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse, AuthRequest } from "../types";
 
@@ -21,10 +20,19 @@ export class AuthController {
     res.status(201).json(response);
   }
 
-  async login(req: Request, res: Response) {
-    res.status(200).json({
-      message: "User logged in",
-      body: req.body,
-    });
+  async login(req: AuthRequest, res: Response): Promise<void> {
+    const { user, tokens } = await authService.login(req.body);
+
+    const response: ApiResponse = {
+      success: true,
+      data: {
+        user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+    };
+    res.status(200).json(response);
   }
+
+  async logout(req: Request, res: Response) {}
 }
