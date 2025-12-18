@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { env, logger } from "./config";
+import authRoutes from "../src/routes/auth.routes";
 
 const app: Application = express();
 
@@ -58,6 +59,7 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 // API Routes
+app.use("/api/auth", authRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
