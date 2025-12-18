@@ -49,5 +49,30 @@ export class AuthController {
     res.status(200).json(response);
   }
 
-  async logout(req: Request, res: Response) {}
+  async logout(req: AuthRequest, res: Response): Promise<void> {
+    const { refreshToken } = req.body;
+    await authService.logout(refreshToken);
+
+    const response: ApiResponse = {
+      success: true,
+      data: { message: "Logged out successfully" },
+    };
+
+    res.status(200).json(response);
+  }
+
+  async getMe(req: AuthRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      throw new Error("User not authenticated");
+    }
+
+    const user = await authService.getCurrentUser(req.user.userId);
+
+    const response: ApiResponse = {
+      success: true,
+      data: { user },
+    };
+
+    res.status(200).json(response);
+  }
 }

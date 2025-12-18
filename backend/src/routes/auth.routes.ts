@@ -7,6 +7,7 @@ import {
   registerSchema,
 } from "../validators/auth.validator";
 import { validateBody } from "../middlewares/validation";
+import { authenticate } from "../middlewares/auth";
 
 const router = Router();
 const authController = new AuthController();
@@ -29,5 +30,14 @@ router.post(
   validateBody(refreshTokenSchema),
   asyncHandler(authController.refresh)
 );
+
+router.post(
+  "/logout",
+  validateBody(refreshTokenSchema),
+  asyncHandler(authController.logout)
+);
+
+// Protected routes
+router.get("/me", authenticate, asyncHandler(authController.getMe));
 
 export default router;

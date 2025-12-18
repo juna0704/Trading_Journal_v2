@@ -163,6 +163,43 @@ export class AuthService {
     return tokens;
   }
 
+  async logout(refreshToken: string): Promise<void> {
+    // Revoke refresh token
+    await prisma.refreshToken.updateMany({
+      where: { token: refreshToken },
+      data: { isRevoked: true },
+    });
+
+    logger.info("User logged out");
+  }
+
+  async getCurrentUser(userId: string): Promise<User> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isEmailVerified: true,
+        isActive: true,
+        lastLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(404, "USER_NOT_FOUND", "User not found");
+    }
+
+    if (!user.isActive) {
+      throw new AppError(403, "ACCOUNT_DISABLED", "Account has been disabled");
+    }
+
+    return user;
+  }
+
   private async generateTokens(
     userId: string,
     email: string
