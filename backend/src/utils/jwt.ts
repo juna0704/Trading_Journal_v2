@@ -34,3 +34,38 @@ export const generateRefreshToken = (userId: string, email: string): string => {
     env.JWT_REFRESH_EXPIRES_IN
   );
 };
+
+const verifyToken = (
+  token: string,
+  secret: string,
+  expectedType: "access" | "refresh"
+): AuthTokenPayload => {
+  try {
+    const payload = jwt.verify(token, secret, {
+      issuer: ISSUER,
+      audience: AUDIENCE,
+    }) as AuthTokenPayload;
+
+    if (payload.type !== expectedType) {
+      throw new AppError(401, "INVALID_TOKEN_TYPE", "Invalid token type");
+    }
+
+    return payload;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new AppError(401, "TOKEN_EXPIRED", `${expectedType} token expired`);
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new AppError(401, "INVALID_TOKEN", `Invalid ${expectedType} token`);
+    }
+
+    throw error;
+  }
+};
+
+export const verifyAccessToken = (token: string) =>
+  verifyToken(token, env.JWT_SECRET, "access");
+
+export const verifyRefreshToken = (token: string) =>
+  verifyToken(token, env.JWT_REFRESH_SECRET, "refresh");

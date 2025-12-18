@@ -3,7 +3,11 @@ import argon2 from "argon2";
 import { prisma } from "../config";
 import { AppError, AuthTokens, User } from "../types";
 import { RegisterInput, LoginInput } from "../validators/auth.validator";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/jwt";
 import { logger } from "../config";
 
 export class AuthService {
@@ -101,6 +105,62 @@ export class AuthService {
     const { password: _, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword as User, tokens };
+  }
+
+  async refreshTokens(refreshToken: string): Promise<AuthTokens> {
+    // verify refresh token
+    const payload = verifyRefreshToken(refreshToken);
+
+    // Check if refresh token exists and is not revoked
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!storedToken) {
+      throw new AppError(
+        401,
+        "INVALID_REFRESH_TOKEN",
+        "Refresh token not found"
+      );
+    }
+
+    if (storedToken.isRevoked) {
+      throw new AppError(
+        401,
+        "TOKEN_REVOKED",
+        "Refresh token has been revoked"
+      );
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      throw new AppError(401, "TOKEN_EXPIRED", "Refresh token has expired");
+    }
+
+    if (storedToken.userId !== payload.userId) {
+      throw new AppError(401, "INVALID_TOKEN", "Token user mismatch");
+    }
+
+    // Check if user is active
+    if (!storedToken.user.isActive) {
+      throw new AppError(403, "ACCOUNT_DISABLED", "Account has been disabled");
+    }
+
+    // Revoke old refresh token
+    await prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { isRevoked: true },
+    });
+
+    // Generate new tokens
+    const tokens = await this.generateTokens(
+      storedToken.userId,
+      storedToken.user.email
+    );
+
+    logger.info("Tokens refreshed", { userId: storedToken.userId });
+
+    return tokens;
   }
 
   private async generateTokens(

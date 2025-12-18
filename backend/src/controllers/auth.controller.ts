@@ -34,5 +34,20 @@ export class AuthController {
     res.status(200).json(response);
   }
 
+  async refresh(req: AuthRequest, res: Response): Promise<void> {
+    const { refreshToken } = req.body;
+    const tokens = await authService.refreshTokens(refreshToken);
+
+    const response: ApiResponse = {
+      success: true,
+      data: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+    };
+
+    res.status(200).json(response);
+  }
+
   async logout(req: Request, res: Response) {}
 }
