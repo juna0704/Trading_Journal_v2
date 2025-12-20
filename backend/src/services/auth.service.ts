@@ -345,60 +345,6 @@ export class AuthService {
   }
 
   /**
-   * Admin activates a user account
-   */
-  async activateUser(userId: string, adminId: string): Promise<{ user: User }> {
-    // Verify the requesting user is an admin
-    const admin = await prisma.user.findUnique({
-      where: { id: adminId },
-      select: { role: true },
-    });
-
-    if (!admin || (admin.role !== "ADMIN" && admin.role !== "SUPER_ADMIN")) {
-      throw new AppError(403, "FORBIDDEN", "Only admins can activate users");
-    }
-
-    // Check if user exists
-    const targetUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, isActive: true },
-    });
-
-    if (!targetUser) {
-      throw new AppError(404, "USER_NOT_FOUND", "User not found");
-    }
-
-    if (targetUser.isActive) {
-      throw new AppError(400, "ALREADY_ACTIVE", "User is already active");
-    }
-
-    // Activate the user
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { isActive: true },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        isEmailVerified: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    // Send approval/activation email
-    await emailService.sendAccountApprovedEmail(user.email);
-
-    logger.info("User activated", { userId, activatedBy: adminId });
-
-    return { user };
-  }
-
-  /**
    * User login
    */
   async login(data: LoginInput): Promise<{ user: User; tokens: AuthTokens }> {
@@ -552,7 +498,7 @@ export class AuthService {
       },
     });
 
-    logger.info("Email verified", { userId: user.id, eamil: user.email });
+    logger.info("Email verified", { userId: user.id, email: user.email });
 
     return { message: "Email verified successfully" };
   }

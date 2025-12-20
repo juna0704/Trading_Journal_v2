@@ -4,29 +4,12 @@ import { z } from "zod";
 // PUBLIC REGISTRATION
 // ============================================
 export const registerSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email format")
-    .min(1, "Email is required")
-    .max(255, "Email too long"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(128, "Password too long")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
-  firstName: z
-    .string()
-    .min(1, "First name too short")
-    .max(100, "Fist name too long")
-    .optional(),
-  lastName: z
-    .string()
-    .min(1, "Last name too short")
-    .max(100, "Last name too long")
-    .optional(),
+  body: z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+  }),
 });
 
 // ============================================
@@ -34,35 +17,24 @@ export const registerSchema = z.object({
 // ============================================
 
 export const adminRegisterSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email format")
-    .min(1, "Email is required")
-    .max(255, "Email too long"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(128, "Password too long")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
-  firstName: z
-    .string()
-    .min(1, "First name is required")
-    .max(100, "First name too long")
-    .optional(),
-  lastName: z
-    .string()
-    .min(1, "Last name is required")
-    .max(100, "Last name too long")
-    .optional(),
-  role: z
-    .enum(["USER", "ADMIN"], {
-      errorMap: () => ({ message: "Role must be either USER or ADMIN" }),
-    })
-    .optional()
-    .default("USER"),
+  body: z.object({
+    email: z.string().email(),
+    password: z
+      .string()
+      .min(8)
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    role: z
+      .enum(["USER", "ADMIN"], {
+        errorMap: () => ({ message: "Role must be either USER or ADMIN" }),
+      })
+      .optional()
+      .default("USER"),
+  }),
 });
 
 // ============================================
@@ -70,7 +42,9 @@ export const adminRegisterSchema = z.object({
 // ============================================
 
 export const verifyEmailSchema = z.object({
-  token: z.string().min(1, "Verification token is required"),
+  query: z.object({
+    token: z.string().min(1),
+  }),
 });
 
 export const resendVerificationSchema = z.object({
@@ -84,15 +58,19 @@ export const resendVerificationSchema = z.object({
 // ============================================
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-  password: z.string().min(1, "Password is required"),
+  body: z.object({
+    email: z.string().email("Invalid email format").min(1, "Email is required"),
+    password: z.string().min(1, "Password is required"),
+  }),
 });
 
 // ============================================
 // TOKEN REFRESH
 // ============================================
 export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, "Refresh token is required"),
+  body: z.object({
+    refreshToken: z.string().min(1, "Refresh token is required"),
+  }),
 });
 
 // ============================================
@@ -100,17 +78,21 @@ export const refreshTokenSchema = z.object({
 // ============================================
 
 export const approveUserSchema = z.object({
-  userId: z.string().uuid("Invalid user ID format"),
+  params: z.object({
+    userId: z.string().uuid(),
+  }),
 });
 
 // ============================================
 // TYPE EXPORTS
 // ============================================
 
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type AdminRegisterInput = z.infer<typeof adminRegisterSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
-export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
-export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
-export type ApproveUserInput = z.infer<typeof approveUserSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>["body"];
+export type AdminRegisterInput = z.infer<typeof adminRegisterSchema>["body"];
+export type LoginInput = z.infer<typeof loginSchema>["body"];
+export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>["body"];
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["query"];
+export type ResendVerificationInput = z.infer<
+  typeof resendVerificationSchema
+>["body"];
+export type ApproveUserInput = z.infer<typeof approveUserSchema>["params"];

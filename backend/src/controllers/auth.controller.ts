@@ -233,7 +233,7 @@ export class AuthController {
     }
 
     const { userId } = req.params;
-    const { user } = await authService.activateUser(userId, req.user.userId);
+    const { user } = await authService.approveUser(userId, req.user.userId);
 
     logger.info("User activated", {
       userId,

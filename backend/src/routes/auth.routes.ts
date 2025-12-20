@@ -10,7 +10,7 @@ import {
   resendVerificationSchema,
   verifyEmailSchema,
 } from "../validators/auth.validator";
-import { validateBody, validateQuery } from "../middlewares/validation";
+import { validate } from "../middlewares/validation";
 import { authenticate, requireAdmin } from "../middlewares/auth";
 
 const router = Router();
@@ -26,11 +26,9 @@ const authController = new AuthController();
  */
 router.post(
   "/register",
-  validateBody(registerSchema),
+  validate(registerSchema),
   asyncHandler(authController.register)
 );
-
-router.post("/admin/approve/:userId");
 
 /**
  * POST /auth/login
@@ -38,7 +36,7 @@ router.post("/admin/approve/:userId");
  */
 router.post(
   "/login",
-  validateBody(loginSchema),
+  validate(loginSchema),
   asyncHandler(authController.login)
 );
 
@@ -48,7 +46,7 @@ router.post(
  */
 router.post(
   "/refresh",
-  validateBody(refreshTokenSchema),
+  validate(refreshTokenSchema),
   asyncHandler(authController.refresh)
 );
 
@@ -56,10 +54,10 @@ router.post(
  * POST /auth/verify-email
  * Verify email address using token sent via email
  */
-router.post(
+router.get(
   "/verify-email",
-  validateQuery(verifyEmailSchema),
-  authController.verifyEmail
+  validate(verifyEmailSchema),
+  asyncHandler(authController.verifyEmail)
 );
 
 /**
@@ -68,8 +66,8 @@ router.post(
  */
 router.post(
   "/resend-verification",
-  validateBody(resendVerificationSchema),
-  authController.resendVerification
+  validate(resendVerificationSchema),
+  asyncHandler(authController.resendVerification)
 );
 
 /**
@@ -78,7 +76,7 @@ router.post(
  */
 router.post(
   "/logout",
-  validateBody(refreshTokenSchema),
+  validate(refreshTokenSchema),
   asyncHandler(authController.logout)
 );
 
@@ -106,7 +104,7 @@ router.post(
   "/admin/register",
   authenticate,
   requireAdmin,
-  validateBody(adminRegisterSchema),
+  validate(adminRegisterSchema),
   asyncHandler(authController.adminRegister)
 );
 
@@ -120,7 +118,7 @@ router.post(
   "/admin/approve/:userId",
   authenticate,
   requireAdmin,
-  validateBody(approveUserSchema),
+  validate(approveUserSchema),
   asyncHandler(authController.approveUser)
 );
 
@@ -145,7 +143,7 @@ router.post(
   "/admin/deactivate/:userId",
   authenticate,
   requireAdmin,
-  validateBody(approveUserSchema),
+  validate(approveUserSchema),
   asyncHandler(authController.deactivateUser)
 );
 
@@ -158,7 +156,7 @@ router.post(
   "/admin/activate/:userId",
   authenticate,
   requireAdmin,
-  validateBody(approveUserSchema),
+  validate(approveUserSchema),
   asyncHandler(authController.activateUser)
 );
 
