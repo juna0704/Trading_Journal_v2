@@ -54,7 +54,17 @@ app.get("/health", (_req: Request, res: Response) => {
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: env.NOD_ENV,
+    environment: env.NODE_ENV,
+  });
+});
+
+// API live
+app.get("/api/live", (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: "Live",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: env.NODE_ENV,
   });
 });
 
@@ -82,8 +92,8 @@ app.use((err: Error, req: Request, res: Response) => {
   res.status(500).json({
     success: false,
     message:
-      env.NOD_ENV === "production" ? "Internal server error" : err.message,
-    ...(env.NOD_ENV === "development" && { stack: err.stack }),
+      env.NODE_ENV === "production" ? "Internal server error" : err.message,
+    ...(env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 

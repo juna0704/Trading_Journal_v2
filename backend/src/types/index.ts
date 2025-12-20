@@ -28,6 +28,7 @@ export interface AuthRequest extends Request {
   user?: {
     userId: string;
     email: string;
+    role?: string;
   };
 }
 
@@ -43,12 +44,19 @@ export interface LoginDto {
   password: string;
 }
 
+export interface EmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+}
+
 export interface RefreshTokenDto {
   refreshToken: string;
 }
 
 export interface ApiResponse<T = any> {
   success: boolean;
+  message?: string;
   data?: T;
   error?: {
     code: string;

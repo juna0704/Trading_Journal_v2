@@ -16,19 +16,25 @@ model User {
   password                 String
   firstName                String?   @map("first_name")
   lastName                 String?   @map("last_name")
+  
   isEmailVerified          Boolean   @default(false)
   emailVerificationToken   String?
   emailVerificationExpires DateTime?
+  
   passwordResetToken       String?
   passwordResetExpires     DateTime?
+  
   role                     Role      @default(USER)
   isActive                 Boolean   @default(true) @map("is_active")
   lastLoginAt              DateTime?
+  
   createdAt                DateTime  @default(now()) @map("created_at")
   updatedAt                DateTime  @updatedAt @map("updated_at")
 
   refreshTokens RefreshToken[]
   trades        Trade[]
+  passwordResetAttempt      PasswordResetAttempt[]
+
 
   @@index([email])
   @@map("users")
@@ -38,6 +44,19 @@ enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+}
+
+model PasswordResetAttempt {
+  id        String   @id @default(uuid())
+  userId    String
+  ipAddress String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("password_reset_attempts")
 }
 
 model RefreshToken {

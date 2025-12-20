@@ -55,3 +55,18 @@ export const validateBody = (schema: AnyZodObject) => {
     }
   };
 };
+
+export const validateQuery = (schema: AnyZodObject) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      req.query = await schema.parseAsync(req.query);
+      next();
+    } catch (error) {
+      next(error); // error handling logic here
+    }
+  };
+};

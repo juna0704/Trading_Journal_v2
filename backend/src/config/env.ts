@@ -21,6 +21,21 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
 
+  // Email
+  SMTP_HOST: z.string().default("smtp.ethereal.email"),
+  SMTP_PORT: z.string().transform(Number).default("587"),
+  SMTP_USER: z.string(),
+  SMTP_PASS: z.string(),
+  SMTP_FROM: z.string().email().default("noreply@tradingjournal.com"),
+
+  // Admin
+  ADMIN_EMAIL: z.string(),
+  SUPPORT_EMAIL: z.string(),
+
+  // Application
+  APP_NAME: z.string().default("Trading Journal"),
+  FRONTEND_URL: z.string().url().default("http://localhost:3000"),
+
   // AWS (for future use)
   AWS_REGION: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
