@@ -1,7 +1,7 @@
 import app from "./app";
 import { connectDatabase, disconnectDatabase } from "./config";
-import env from "./config/env";
-import logger from "./config/logger";
+import { logger, env } from "./config";
+import { scheduleCleanupJobs } from "./jobs/cleanup.job";
 
 const PORT = env.PORT || 5000;
 
@@ -11,6 +11,9 @@ const startServer = async () => {
   try {
     // Connection to database
     await connectDatabase();
+
+    // Schedule background jobs
+    await scheduleCleanupJobs();
 
     server = app.listen(PORT, () => {
       logger.info(`🚀 Server is running on port ${PORT}`);

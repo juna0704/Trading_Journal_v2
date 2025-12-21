@@ -32,26 +32,21 @@ export interface AuthRequest extends Request {
   };
 }
 
-export interface RegisterDto {
+export interface RequestResetInput {
   email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
+  ipAddress: string;
+  userAgent?: string;
 }
 
-export interface LoginDto {
-  email: string;
-  password: string;
+export interface ResetPasswordInput {
+  token: string;
+  newPassword: string;
 }
 
 export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
-}
-
-export interface RefreshTokenDto {
-  refreshToken: string;
 }
 
 export interface ApiResponse<T = any> {
