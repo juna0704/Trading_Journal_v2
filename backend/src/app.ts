@@ -1,9 +1,10 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import { generalLimiter } from "./middlewares/rateLimit";
 import { env, logger } from "./config";
 import authRoutes from "../src/routes/auth.routes";
+import passwordRoutes from "./routes/password.routes";
 
 const app: Application = express();
 
@@ -21,15 +22,7 @@ app.use(
 );
 
 // RateLimiter
-const limiter = rateLimit({
-  windowMs: env.RATE_LIMIT_MAX_REQUESTS,
-  max: env.RATE_LIMIT_MAX_REQUESTS,
-  message: "Too many requests from this IP, Please try again later",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use("/api", limiter);
+app.use("/api", generalLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
@@ -70,6 +63,7 @@ app.get("/api/live", (_req: Request, res: Response) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/password", passwordRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
