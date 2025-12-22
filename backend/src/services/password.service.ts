@@ -102,15 +102,14 @@ export class PasswordService {
     if (!user) {
       throw new AppError(
         400,
-        "Invalid or expired reset token",
-
-        "INVALID_RESET_TOKEN"
+        "INVALID_RESET_TOKEN",
+        "Invalid or expired reset token"
       );
     }
 
     // Check if token is expired
     if (!user.passwordResetExpires || user.passwordResetExpires < new Date()) {
-      throw new AppError(400, "Reset token has expired", "RESET_TOKEN_EXPIRED");
+      throw new AppError(400, "RESET_TOKEN_EXPIRED", "Reset token has expired");
     }
 
     // Hash new password
@@ -170,9 +169,8 @@ export class PasswordService {
       logger.warn("Password reset rate limit exceeded (hourly)", { userId });
       throw new AppError(
         429,
-        "Too many reset requests. Please try again later.",
-
-        "RATE_LIMIT_EXCEEDED"
+        "RATE_LIMIT_EXCEEDED",
+        "Too many reset requests. Please try again later."
       );
     }
 
@@ -181,9 +179,8 @@ export class PasswordService {
       logger.warn("Password reset rate limit exceeded (daily)", { userId });
       throw new AppError(
         429,
-        "Too many reset requests. Please try again tomorrow or contact support.",
-
-        "RATE_LIMIT_EXCEEDED"
+        "RATE_LIMIT_EXCEEDED",
+        "Too many reset requests. Please try again tomorrow or contact support."
       );
     }
   }

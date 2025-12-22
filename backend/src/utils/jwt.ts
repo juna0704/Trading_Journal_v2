@@ -18,18 +18,26 @@ const signToken = (
 };
 
 // Generate access token
-export const generateAccessToken = (userId: string, email: string): string => {
+export const generateAccessToken = (
+  userId: string,
+  email: string,
+  role: string
+): string => {
   return signToken(
-    { userId, email, type: "access" },
+    { userId, email, role, type: "access" },
     env.JWT_SECRET,
     env.JWT_EXPIRES_IN
   );
 };
 
 // Generate Refresh token
-export const generateRefreshToken = (userId: string, email: string): string => {
+export const generateRefreshToken = (
+  userId: string,
+  email: string,
+  role: string
+): string => {
   return signToken(
-    { userId, email, type: "refresh" },
+    { userId, email, role, type: "refresh" },
     env.JWT_REFRESH_SECRET,
     env.JWT_REFRESH_EXPIRES_IN
   );

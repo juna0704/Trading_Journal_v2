@@ -7,8 +7,21 @@ export interface User {
   firstName?: string | null;
   lastName?: string | null;
   isEmailVerified: boolean;
+  role: string;
   isActive: boolean;
   lastLoginAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PublicUser {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  isEmailVerified: boolean;
+  role: string;
+  lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +29,7 @@ export interface User {
 export interface AuthTokenPayload {
   userId: string;
   email: string;
+  role: string;
   type: "access" | "refresh";
 }
 
@@ -58,6 +72,13 @@ export interface ApiResponse<T = any> {
     message: string;
     details?: any;
   };
+}
+
+export interface RateLimitOptions {
+  windowMs: number;
+  max: number;
+  message?: string;
+  skipSuccessfulRequests?: boolean;
 }
 
 export class AppError extends Error {

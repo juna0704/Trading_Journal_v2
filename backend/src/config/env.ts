@@ -1,7 +1,18 @@
 import { z } from "zod";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+const NODE_ENV = process.env.NODE_ENV || "development";
+
+const envFileMap: Record<string, string> = {
+  development: ".env.development",
+  test: ".env.test",
+  production: ".env.production",
+};
+
+dotenv.config({
+  path: path.resolve(process.cwd(), envFileMap[NODE_ENV]),
+});
 
 const envSchema = z.object({
   NODE_ENV: z

@@ -17,7 +17,7 @@ export const authenticate = async (
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       throw new AppError(401, "UNAUTHORIZED", "No token provided");
     }
 
@@ -36,31 +36,11 @@ export const authenticate = async (
     // Verify token
     const payload = verifyAccessToken(token);
 
-    // Check if user exists and is active
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        isActive: true,
-        isEmailVerified: true,
-      },
-    });
-
-    if (!user) {
-      throw new AppError(401, "UNAUTHORIZED", "User not found");
-    }
-
-    if (!user.isActive) {
-      throw new AppError(403, "FORBIDDEN", "Account is not active");
-    }
-
     // Attach user info to request
     req.user = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
     };
 
     next();
