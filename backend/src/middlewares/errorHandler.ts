@@ -1,7 +1,7 @@
 // backend/src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { AppError, ApiResponse } from "../types";
-import { logger } from "../config";
+import { logger, env } from "../config";
 import { Prisma } from "../generated/prisma/client";
 
 export const errorHandler = (
@@ -83,7 +83,7 @@ export const errorHandler = (
     error: {
       code: "INTERNAL_SERVER_ERROR",
       message:
-        process.env.NODE_ENV === "production"
+        env.NODE_ENV === "production"
           ? "An unexpected error occurred"
           : err.message,
     },

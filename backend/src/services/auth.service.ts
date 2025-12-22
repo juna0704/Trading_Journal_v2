@@ -393,7 +393,7 @@ export class AuthService {
     });
 
     // Generate token
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     logger.info("User logged in", { userId: user.id, email: user.email });
 
@@ -454,7 +454,8 @@ export class AuthService {
     // Generate new tokens
     const tokens = await this.generateTokens(
       storedToken.userId,
-      storedToken.user.email
+      storedToken.user.email,
+      storedToken.user.role
     );
 
     logger.info("Tokens refreshed", { userId: storedToken.userId });
@@ -594,29 +595,29 @@ export class AuthService {
    */
   private async generateTokens(
     userId: string,
-    email: string
+    email: string,
+    role: string
   ): Promise<AuthTokens> {
-    const accessToken = generateAccessToken(userId, email);
-    const refreshToken = generateRefreshToken(userId, email);
+    const accessToken = generateAccessToken(userId, email, role);
+    const refreshToken = generateRefreshToken(userId, email, role);
 
     // Store refresh token in database
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
-    await prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId,
-        expiresAt,
-      },
-    });
+    await prisma.$transaction([
+      // Delete all existing token for same user
+      prisma.refreshToken.deleteMany({ where: { userId } }),
 
-    await prisma.refreshToken.deleteMany({
-      where: {
-        userId,
-        expiresAt: { lt: new Date() },
-      },
-    });
+      // Create the new one
+      prisma.refreshToken.create({
+        data: {
+          token: refreshToken,
+          userId,
+          expiresAt,
+        },
+      }),
+    ]);
 
     return { accessToken, refreshToken };
   }

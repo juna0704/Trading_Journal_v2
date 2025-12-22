@@ -73,21 +73,42 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+enum TradeStatus {
+  OPEN
+  CLOSED
+}
+
+enum TradeSide {
+  LONG
+  SHORT
+}
+
 model Trade {
   id            String    @id @default(cuid())
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   symbol        String
-  type          String // BUY, SELL
-  quantity      Float
-  entryPrice    Float
-  exitPrice     Float?
+  side          TradeSide
+  status        TradeStatus @default(OPEN)
+
+  quantity      Decimal     @db.Decimal(18, 8)
+  entryPrice    Decimal     @db.Decimal(18, 8)
+  exitPrice     Decimal?    @db.Decimal(18, 8)
+
+  profitLoss    Decimal?    @db.Decimal(18, 8)
+  pnlPercentage Decimal?    @db.Decimal(10, 4)
+
+  stopLoss      Decimal?    @db.Decimal(18, 8)
+  takeProfit    Decimal?    @db.Decimal(18, 8)
+  fees          Decimal     @default(0) @db.Decimal(18, 8)
+
   entryDate     DateTime
   exitDate      DateTime?
-  status        String // OPEN, CLOSED
-  profitLoss    Float?
-  notes         String?
+
+  notes         String?   @db.Text
+  tags          String[]
   screenshotUrl String?
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
