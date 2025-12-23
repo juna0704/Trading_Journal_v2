@@ -1,4 +1,4 @@
-import { PublicUser } from "../types";
+import { PublicUser } from "../types/auth.types";
 
 export const sanitizeUser = (user: any): PublicUser => {
   return {

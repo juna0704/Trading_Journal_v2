@@ -1,11 +1,11 @@
 // backend/src/services/password.service.ts
 import argon2 from "argon2";
 import crypto from "crypto";
-import { AppError } from "../types";
+import { AppError } from "../types/auth.types";
 import { emailService } from "./email.service";
 import { logger, prisma } from "../config";
 
-import { RequestResetInput, ResetPasswordInput } from "../types";
+import { RequestResetInput, ResetPasswordInput } from "../types/auth.types";
 
 export class PasswordService {
   private readonly RESET_TOKEN_EXPIRY_HOURS = 1;

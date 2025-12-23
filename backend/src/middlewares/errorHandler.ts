@@ -1,6 +1,6 @@
 // backend/src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
-import { AppError, ApiResponse } from "../types";
+import { AppError, ApiResponse } from "../types/auth.types";
 import { logger, env } from "../config";
 import { Prisma } from "../generated/prisma/client";
 

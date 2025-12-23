@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { logger, env } from "../config";
-import { EmailOptions } from "../types";
+import { EmailOptions } from "../types/auth.types";
 
 class EmailService {
   private transporter: nodemailer.Transporter;

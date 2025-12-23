@@ -1,6 +1,6 @@
 // backend/src/middleware/auth.ts
 import { Response, NextFunction } from "express";
-import { AuthRequest, AppError } from "../types";
+import { AuthRequest, AppError } from "../types/auth.types";
 import { verifyAccessToken } from "../utils/jwt";
 import { logger, prisma } from "../config";
 

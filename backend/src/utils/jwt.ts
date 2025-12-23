@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { AuthTokenPayload, AppError } from "../types";
+import { AuthTokenPayload, AppError } from "../types/auth.types";
 import { env } from "../config";
 
 const ISSUER = "Trading-journal-api";

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
-import { ApiResponse, AuthRequest } from "../types";
+import { ApiResponse, AuthRequest } from "../types/auth.types";
 import { logger } from "../config";
 
 // ============================================

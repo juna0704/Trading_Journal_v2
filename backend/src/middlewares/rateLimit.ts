@@ -1,7 +1,7 @@
 import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import Redis from "ioredis";
-import { AppError, RateLimitOptions } from "../types";
+import { AppError, RateLimitOptions } from "../types/auth.types";
 import { env, logger } from "../config";
 
 // Initialize Redis client
