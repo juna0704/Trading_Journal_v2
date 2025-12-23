@@ -2,19 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Minimal, safe global defaults */
-html,
-body {
-  height: 100%;
+@layer base {
+  :root {
+    --background: 31 33% 97%;
+    --foreground: 0 0% 13%;
+    --card: 30 40% 94%;
+    --card-foreground: 0 0% 13%;
+    --popover: 31 33% 97%;
+    --popover-foreground: 0 0% 13%;
+    --primary: 0 0% 13%;
+    --primary-foreground: 31 33% 97%;
+    --secondary: 30 40% 94%;
+    --secondary-foreground: 0 0% 13%;
+    --muted: 28 29% 87%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 28 29% 87%;
+    --accent-foreground: 0 0% 13%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 31 33% 97%;
+    --border: 28 29% 87%;
+    --input: 28 29% 87%;
+    --ring: 0 0% 13%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 0 0% 13%;
+    --foreground: 31 33% 97%;
+    --card: 0 0% 16%;
+    --card-foreground: 31 33% 97%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 31 33% 97%;
+    --primary: 31 33% 97%;
+    --primary-foreground: 0 0% 13%;
+    --secondary: 30 40% 94%;
+    --secondary-foreground: 0 0% 13%;
+    --muted: 0 0% 25%;
+    --muted-foreground: 28 29% 87%;
+    --accent: 30 40% 94%;
+    --accent-foreground: 0 0% 13%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 31 33% 97%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 31 33% 97%;
+  }
 }
 
-/* body {
-  @apply bg-cream;
-  color: black;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
 }
 
-.dark {
-  @apply bg-charcoal;
-} */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/70 dark:bg-charcoal/70 border border-tan/30 dark:border-beige/20;
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-lg bg-white/80 dark:bg-charcoal/80 border border-tan/40 dark:border-beige/30;
+  }
+}
