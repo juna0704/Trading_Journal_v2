@@ -7,12 +7,9 @@ import { AuthLayout } from "@/components/layout/auth-layout";
 import { ThemedInput } from "@/components/ui/themed-input";
 import { ThemedButton } from "@/components/ui/themed-button";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
-});
+import { forgotPasswordSchema } from "@/lib/validators/auth";
+import { getErrorMessage } from "@/lib/api-error";
 
 export default function ForgotPasswordPage() {
   const { forgotPassword } = useAuth();
@@ -39,7 +36,7 @@ export default function ForgotPasswordPage() {
       if (resetError.message?.includes("rate limit")) {
         toast.error("Too many requests. Please try again later.");
       } else {
-        toast.error(resetError.message || "Failed to send reset email");
+        toast.error(getErrorMessage(resetError));
       }
     } else {
       setSuccess(true);

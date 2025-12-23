@@ -8,18 +8,9 @@ import { ThemedInput } from "@/components/ui/themed-input";
 import { ThemedButton } from "@/components/ui/themed-button";
 import { PasswordStrength } from "@/components/ui/password-strength";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Lock, CheckCircle2, XCircle } from "lucide-react";
-
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+import { resetPasswordSchema } from "@/lib/validators/auth";
+import { getErrorMessage } from "@/lib/api-error";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -71,7 +62,7 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (error) {
-      toast.error(error.message || "Failed to reset password");
+      toast.error(getErrorMessage(error));
     } else {
       setSuccess(true);
       setTimeout(() => router.push("/auth/login"), 3000);

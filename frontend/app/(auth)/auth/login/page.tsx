@@ -8,13 +8,9 @@ import { AuthLayout } from "@/components/layout/auth-layout";
 import { ThemedInput } from "@/components/ui/themed-input";
 import { ThemedButton } from "@/components/ui/themed-button";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Mail, Lock } from "lucide-react";
-
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+import { loginSchema } from "@/lib/validators/auth";
+import { getErrorMessage } from "@/lib/api-error";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,7 +44,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      toast.error(error.message || "Failed to sign in");
+      toast.error(getErrorMessage(error));
     } else {
       toast.success("Welcome back!");
       router.push("/dashboard");
