@@ -5,9 +5,11 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  isActive: boolean;
   isEmailVerified: boolean;
   role: string;
   createdAt: string;
+  lastLoginAt: Date;
 }
 
 export interface AuthContextType {

@@ -361,11 +361,6 @@ export class AuthService {
       );
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      throw new AppError(403, "ACCOUNT_DISABLED", "Account has been desiabled");
-    }
-
     // Verify password
     const isPasswordValid = await argon2.verify(user.password, data.password);
 
@@ -374,15 +369,6 @@ export class AuthService {
         401,
         "INVALID_CREDENTIALS",
         "Invalid email or password"
-      );
-    }
-
-    // Require email verification
-    if (!user.isEmailVerified) {
-      throw new AppError(
-        403,
-        "EMAIL_NOT_VERIFIED",
-        "Please verify your email before logging in"
       );
     }
 
@@ -395,7 +381,12 @@ export class AuthService {
     // Generate token
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
-    logger.info("User logged in", { userId: user.id, email: user.email });
+    logger.info("User logged in", {
+      userId: user.id,
+      email: user.email,
+      isActive: user.isActive,
+      isEmailVerified: user.isEmailVerified,
+    });
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;

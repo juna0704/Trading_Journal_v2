@@ -20,6 +20,7 @@ export interface PublicUser {
   firstName: string | null;
   lastName: string | null;
   isEmailVerified: boolean;
+  isActive: boolean;
   role: string;
   lastLoginAt: Date | null;
   createdAt: Date;

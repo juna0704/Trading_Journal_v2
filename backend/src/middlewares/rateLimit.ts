@@ -58,7 +58,7 @@ export const generalLimiter = createRateLimiter({
  */
 export const authLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 100,
   message: "Too many login attempts. Please try again in 15 minutes.",
   skipSuccessfulRequests: true, // Only punish failed attempts
 });
@@ -69,6 +69,6 @@ export const authLimiter = createRateLimiter({
  */
 export const passwordResetLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  max: 100,
   message: "Too many password reset requests. Please try again in an hour.",
 });
