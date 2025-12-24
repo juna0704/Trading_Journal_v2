@@ -107,6 +107,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const changePassword = async (newPassword: string) => {
+    try {
+      await authService.changePassword(newPassword);
+      return {};
+    } catch (error) {
+      return { error: getErrorMessage(error) };
+    }
+  };
+
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      await authService.resendVerification(email);
+      return {};
+    } catch (error: any) {
+      return {
+        error: getErrorMessage(error),
+      };
+    }
+  };
+
   console.log("=== AuthContext State ===");
   console.log("Loading:", loading);
   console.log("User:", user);
@@ -121,6 +141,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         forgotPassword,
         resetPassword,
+        resendVerificationEmail,
+        changePassword,
       }}
     >
       {children}

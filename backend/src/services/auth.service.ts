@@ -551,6 +551,23 @@ export class AuthService {
   }
 
   /**
+   * ChangePassword
+   */
+  async changePassword(userId: string, newPassword: string) {
+    const passwordHash = await argon2.hash(newPassword);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: passwordHash },
+    });
+
+    // Optional but recommended
+    await prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+  }
+
+  /**
    * Get current user profile
    */
   async getCurrentUser(userId: string): Promise<User> {

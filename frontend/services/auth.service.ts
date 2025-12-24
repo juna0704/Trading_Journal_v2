@@ -36,6 +36,10 @@ export const authService = {
     return response.data.data.user;
   },
 
+  changePassword(newPassword: string) {
+    return apiClient.post("/auth/change-password", { newPassword });
+  },
+
   forgotPassword(email: string) {
     return apiClient.post("/password/request-reset", { email });
   },

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
-import { ApiResponse, AuthRequest } from "../types/auth.types";
+import { ApiResponse, AppError, AuthRequest } from "../types/auth.types";
 import { logger } from "../config";
 import { sanitizeUser } from "../utils/sanitizeUser";
 
@@ -120,6 +120,22 @@ export class AuthController {
     res.status(200).json({
       success: true,
       data: { message: "Logged out successfully" },
+    });
+  }
+
+  async changePassword(req: AuthRequest, res: Response) {
+    const userId = req.user?.userId;
+    const { newPassword } = req.body;
+
+    if (!userId) {
+      throw new AppError(403, "USER_NOT_FOUND", "user not found");
+    }
+
+    await authService.changePassword(userId, newPassword);
+
+    res.json({
+      success: true,
+      message: "Password updated successfully",
     });
   }
 

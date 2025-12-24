@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
+import { cn } from "@/lib/cn";
 
 type VerificationState = "verifying" | "success" | "error" | "already_verified";
 
@@ -11,17 +12,17 @@ export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const [state, setState] = useState<VerificationState>("verifying");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isActive, setIsActive] = useState<boolean | null>(null);
   const [email, setEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const [showResendForm, setShowResendForm] = useState(false);
 
+  /* ----------------------------------------------------
+   * VERIFY EMAIL TOKEN
+   * ---------------------------------------------------- */
   useEffect(() => {
     const token = searchParams.get("token");
-
-    console.log("=== Email Verification Debug ===");
-    console.log("Token from URL:", token);
-    console.log("Token length:", token?.length);
 
     if (!token) {
       setState("error");
@@ -32,15 +33,11 @@ export default function VerifyEmailPage() {
 
     const verifyEmail = async () => {
       try {
-        console.log("Calling API with token:", token);
         const response = await authService.verifyEmail(token);
-        console.log("✅ Verification response:", response);
+        const user = response?.data?.data?.user;
+        setIsActive(Boolean(user?.isActive));
         setState("success");
       } catch (error: any) {
-        console.error("❌ Verification error:", error);
-        console.error("Error response data:", error.response?.data);
-        console.error("Error status:", error.response?.status);
-
         const errorCode = error.response?.data?.error?.code;
         const errorMsg = error.response?.data?.error?.message;
 
@@ -60,6 +57,9 @@ export default function VerifyEmailPage() {
     verifyEmail();
   }, [searchParams]);
 
+  /* ----------------------------------------------------
+   * RESEND EMAIL
+   * ---------------------------------------------------- */
   const handleResendVerification = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -127,25 +127,39 @@ export default function VerifyEmailPage() {
             Email Verified!
           </h2>
           <p className="text-gray-600 mb-6">
-            Your email has been successfully verified. Your account is now
-            pending admin approval.
+            Your email has been successfully verified.
           </p>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              <strong>Next Steps:</strong> An administrator will review your
-              account. You'll receive an email once your account is approved and
-              you can log in.
-            </p>
-          </div>
-
-          <button
-            onClick={handleContinue}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
-          >
-            Go to Login
-          </button>
+          {isActive ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-green-800 text-sm">
+                ✅ Your account has been{" "}
+                <strong>activated by an administrator</strong>. You can now log
+                in.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800 text-sm">
+                ⏳ Your email is verified, but your account is still
+                <strong> pending admin approval</strong>. You’ll be notified
+                once it’s activated.
+              </p>
+            </div>
+          )}
         </div>
+
+        <button
+          onClick={handleContinue}
+          disabled={!isActive}
+          className={cn(
+            "w-full py-3 rounded-md font-medium transition",
+            isActive
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+          )}
+        >
+          Go to Login
+        </button>
       </div>
     );
   }

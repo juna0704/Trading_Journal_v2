@@ -10,6 +10,7 @@ import {
   refreshTokenSchema,
   verifyEmailSchema,
   resendVerificationSchema,
+  changePasswordSchema,
 } from "../../validators/auth.validator";
 
 const router = Router();
@@ -34,6 +35,13 @@ router.post(
   authLimiter,
   validate(loginSchema),
   asyncHandler(authController.login)
+);
+
+router.post(
+  "/change-password",
+  authenticate,
+  validate(changePasswordSchema),
+  authController.changePassword
 );
 
 /**

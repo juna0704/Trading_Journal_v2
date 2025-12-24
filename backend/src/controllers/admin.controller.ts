@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse, AuthRequest } from "../types/auth.types";
-import { logger } from "../config";
+import { logger, prisma } from "../config";
 
 // ============================================
 // ADMIN CONTROLLERS
@@ -74,6 +74,31 @@ export class AdminController {
     };
 
     res.status(200).json(response);
+  }
+
+  /**
+   * Get all users
+   */
+  async getAllUsers(req: AuthRequest, res: Response) {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        isEmailVerified: true,
+        lastLoginAt: true,
+        createdAt: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: { users },
+    });
   }
 
   /**

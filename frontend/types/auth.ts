@@ -24,8 +24,10 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   forgotPassword: (email: string) => Promise<{ error?: string }>;
+  changePassword: (newPassword: string) => Promise<{ error?: string }>;
   resetPassword: (
     token: string,
     newPassword: string
   ) => Promise<{ error?: string }>;
+  resendVerificationEmail: (email: string) => Promise<{ error?: string }>;
 }

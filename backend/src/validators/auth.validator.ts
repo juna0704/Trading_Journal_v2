@@ -66,6 +66,15 @@ export const loginSchema = z.object({
 });
 
 // ============================================
+// CHANGE PASSWORD
+// ============================================
+export const changePasswordSchema = z.object({
+  body: z.object({
+    newPassword: z.string().min(8),
+  }),
+});
+
+// ============================================
 // TOKEN REFRESH
 // ============================================
 export const refreshTokenSchema = z.object({
@@ -91,6 +100,7 @@ export const approveUserSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
 export type AdminRegisterInput = z.infer<typeof adminRegisterSchema>["body"];
 export type LoginInput = z.infer<typeof loginSchema>["body"];
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>["body"];
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>["body"];
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["query"];
 export type ResendVerificationInput = z.infer<

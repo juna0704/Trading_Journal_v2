@@ -17,22 +17,40 @@ import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/cn";
 import { useState } from "react";
 import { VerificationBanner } from "../varification-banner";
+import { Shield } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Trades", href: "/trades", icon: BookOpen },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
+  {
+    name: "Admin",
+    href: "/admin",
+    icon: Shield,
+    adminOnly: true,
+  },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  console.log("Sidebar user role:", user?.role);
+
+  if (loading) return null;
+
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+  const filteredNavigation = navigation.filter((item) => {
+    if (!item.adminOnly) return true;
+    return isAdmin;
+  });
 
   return (
     <div className="min-h-screen bg-cream dark:bg-charcoal">
-      <div className="lg:grid lg:grid-cols-[280px_1fr]">
+      <div className="flex">
         <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[280px] lg:flex-col border-r border-tan/30 dark:border-beige/20 bg-beige/30 dark:bg-charcoal/50">
           <div className="flex flex-col flex-1 p-6 space-y-6">
             <Link href="/dashboard" className="flex items-center gap-2 group">
@@ -45,7 +63,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Link>
 
             <nav className="flex-1 space-y-2">
-              {navigation.map((item) => {
+              {filteredNavigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
@@ -85,7 +103,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <div className="lg:pl-[280px]">
+        <div className="flex-1 lg:pl-[280px] min-w-0">
           <header className="sticky top-0 z-10 bg-cream/80 dark:bg-charcoal/80 backdrop-blur-lg border-b border-tan/30 dark:border-beige/20 px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <button
@@ -137,7 +155,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <nav className="flex-1 space-y-2">
-              {navigation.map((item) => {
+              {filteredNavigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
