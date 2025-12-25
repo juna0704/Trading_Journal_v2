@@ -3,7 +3,15 @@
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
-import { Clock, Info, ChevronDown } from "lucide-react";
+import {
+  History,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  MoreVertical,
+  Info,
+  ChevronDown,
+} from "lucide-react";
 
 export default function MyTradesPage() {
   const { user } = useAuth();

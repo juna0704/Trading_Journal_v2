@@ -3,146 +3,179 @@
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
-import { TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
+import {
+  TrendingUp,
+  DollarSign,
+  Activity,
+  ArrowUpRight,
+  Zap,
+  BarChart3,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
   const stats = [
     {
-      name: "Total Trades",
-      value: "0",
-      icon: Activity,
-      change: "+0%",
-      changeType: "positive",
+      name: "Ethereum",
+      symbol: "ETH",
+      price: "$0.02308",
+      change: "+2.47%",
+      color: "text-[#2ED3B7]",
     },
     {
-      name: "Win Rate",
-      value: "0%",
-      icon: TrendingUp,
-      change: "+0%",
-      changeType: "positive",
+      name: "Bitcoin",
+      symbol: "BTC",
+      price: "$0.09514",
+      change: "+2.88%",
+      color: "text-[#2ED3B7]",
     },
     {
-      name: "Total P&L",
-      value: "$0.00",
-      icon: DollarSign,
-      change: "+$0.00",
-      changeType: "positive",
-    },
-    {
-      name: "Avg. Trade",
-      value: "$0.00",
-      icon: TrendingDown,
-      change: "+0%",
-      changeType: "positive",
+      name: "Tether",
+      symbol: "USDT",
+      price: "$0.06892",
+      change: "+2.47%",
+      color: "text-[#2ED3B7]",
     },
   ];
 
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <div className="space-y-8 animate-fade-in">
-          <div>
-            <h1 className="font-display text-4xl font-bold text-charcoal dark:text-cream">
-              Welcome back, {user?.firstName || "Trader"}!
-            </h1>
-            <p className="mt-2 text-charcoal/70 dark:text-cream/70">
-              Here's an overview of your trading performance
-            </p>
-          </div>
+        <div className="space-y-10 animate-fade-in">
+          {/* Top Coins Header */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold">Top Coin of the Market</h2>
+                <p className="text-sm text-[#9BA3AF]">
+                  Recommended coins for 24 hours{" "}
+                  <span className="ml-2 bg-[#F3723B]/20 text-[#F3723B] px-2 py-0.5 rounded text-[10px] font-bold">
+                    3 ASSETS ★
+                  </span>
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <select className="bg-[#151718] border border-white/5 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-white/20">
+                  <option>24H</option>
+                </select>
+                <select className="bg-[#151718] border border-white/5 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-white/20">
+                  <option>Stake</option>
+                </select>
+              </div>
+            </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <div
-                key={stat.name}
-                className="glass rounded-xl p-6 space-y-3 hover:scale-105 transition-transform duration-200"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-charcoal/70 dark:text-cream/70">
-                    {stat.name}
-                  </p>
-                  <div className="h-10 w-10 rounded-lg bg-charcoal/10 dark:bg-cream/10 flex items-center justify-center">
-                    <stat.icon className="h-5 w-5 text-charcoal dark:text-cream" />
+            <div className="grid gap-6 md:grid-cols-3">
+              {stats.map((coin) => (
+                <div
+                  key={coin.name}
+                  className="glass-card p-6 rounded-[2rem] relative overflow-hidden group hover:bg-[#1c1f21] transition-all"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h3 className="font-medium text-white">
+                        {coin.name}{" "}
+                        <span className="text-[#9BA3AF] text-xs ml-1">
+                          ({coin.symbol})
+                        </span>
+                      </h3>
+                      <p className="text-2xl font-bold mt-2 tracking-tight">
+                        {coin.price}
+                      </p>
+                    </div>
+                    <div className="h-10 w-10 rounded-full bg-[#1c1f21] flex items-center justify-center border border-white/5">
+                      <Zap className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-[#9BA3AF]">gain for USDT</span>
+                    <span className={coin.color}>{coin.change}</span>
                   </div>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-charcoal dark:text-cream">
-                    {stat.value}
-                  </p>
-                  <p
-                    className={`text-sm mt-1 ${
-                      stat.changeType === "positive"
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
+              ))}
+            </div>
+          </section>
+
+          {/* Chart and Balance Section */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Mock Chart Area */}
+            <div className="lg:col-span-2 glass-card rounded-[2rem] p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold">Chart</h3>
+                <div className="flex gap-2 bg-[#0B0C0D] p-1 rounded-lg">
+                  <button className="p-1.5 hover:bg-[#1c1f21] rounded-md transition">
+                    <Activity className="h-4 w-4" />
+                  </button>
+                  <button className="p-1.5 hover:bg-[#1c1f21] rounded-md transition">
+                    <BarChart3 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="h-64 flex items-end justify-between gap-1">
+                {/* Visual Placeholder for Candles */}
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-full rounded-t-sm ${
+                      i % 3 === 0
+                        ? "bg-red-500/40 h-24"
+                        : "bg-[#2ED3B7]/40 h-40"
                     }`}
-                  >
-                    {stat.change} from last month
+                    style={{ height: `${Math.random() * 100 + 20}%` }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+
+            {/* My Balance Card */}
+            <div className="glass-card rounded-[2rem] p-8">
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-[#1c1f21] rounded-xl">
+                    <DollarSign className="h-5 w-5 text-[#9BA3AF]" />
+                  </div>
+                  <span className="font-semibold">My Balance</span>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-[#9BA3AF]" />
+              </div>
+
+              <div className="flex justify-between items-end mb-10">
+                <h2 className="text-4xl font-bold tracking-tighter">
+                  $4,472.90
+                </h2>
+                <div className="bg-[#1c1f21] px-3 py-1 rounded-full text-[10px] border border-white/5">
+                  BTH ▼
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-6 mb-10 text-center">
+                <div>
+                  <p className="text-[10px] text-[#9BA3AF] uppercase mb-1">
+                    Total Profit
                   </p>
+                  <p className="text-xs font-bold">+$2,463.20</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-[#9BA3AF] uppercase mb-1">
+                    Avg Growing
+                  </p>
+                  <p className="text-xs font-bold">+14.63%</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-[#9BA3AF] uppercase mb-1">
+                    Best Token
+                  </p>
+                  <p className="text-xs font-bold">Bitcoin</p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="glass-strong rounded-xl p-8">
-            <h2 className="font-display text-2xl font-bold text-charcoal dark:text-cream mb-4">
-              Recent Activity
-            </h2>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="h-16 w-16 rounded-full bg-tan/30 dark:bg-beige/20 flex items-center justify-center mb-4">
-                <Activity className="h-8 w-8 text-charcoal/50 dark:text-cream/50" />
-              </div>
-              <p className="text-lg font-medium text-charcoal dark:text-cream">
-                No trades yet
-              </p>
-              <p className="text-charcoal/60 dark:text-cream/60 mt-1">
-                Start tracking your trades to see them here
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="glass rounded-xl p-6">
-              <h3 className="font-display text-xl font-bold text-charcoal dark:text-cream mb-4">
-                Quick Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-tan/30 dark:border-beige/20">
-                  <span className="text-charcoal/70 dark:text-cream/70">
-                    Best Trade
-                  </span>
-                  <span className="font-semibold text-charcoal dark:text-cream">
-                    $0.00
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-tan/30 dark:border-beige/20">
-                  <span className="text-charcoal/70 dark:text-cream/70">
-                    Worst Trade
-                  </span>
-                  <span className="font-semibold text-charcoal dark:text-cream">
-                    $0.00
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-charcoal/70 dark:text-cream/70">
-                    Profit Factor
-                  </span>
-                  <span className="font-semibold text-charcoal dark:text-cream">
-                    0.00
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass rounded-xl p-6">
-              <h3 className="font-display text-xl font-bold text-charcoal dark:text-cream mb-4">
-                Trading Streak
-              </h3>
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="text-6xl font-bold text-charcoal dark:text-cream mb-2">
-                  0
-                </div>
-                <p className="text-charcoal/70 dark:text-cream/70">days</p>
+              <div className="flex gap-4">
+                <button className="flex-1 bg-[#2ED3B7] text-black font-bold py-4 rounded-2xl text-sm hover:brightness-110 transition">
+                  Withdraw
+                </button>
+                <button className="flex-1 bg-[#F3723B] text-white font-bold py-4 rounded-2xl text-sm hover:brightness-110 transition">
+                  Transfer
+                </button>
               </div>
             </div>
           </div>
