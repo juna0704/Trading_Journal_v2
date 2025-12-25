@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -38,7 +38,12 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
-        const { accessToken } = res.data;
+        const accessToken = res.data.accessToken || res.data.data?.accessToken;
+
+        if (!accessToken) {
+          throw new Error("Invalid refresh response");
+        }
+
         localStorage.setItem("accessToken", accessToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -46,7 +51,7 @@ apiClient.interceptors.response.use(
       } catch {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/auth/login";
+        window.location.href = "/login";
       }
     }
 

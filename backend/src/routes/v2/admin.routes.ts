@@ -30,6 +30,11 @@ router.post(
 );
 
 /**
+ * GET /api/admin/users
+ */
+router.get("/users", asyncHandler(adminController.getAllUsers));
+
+/**
  * POST /api/admin/approve/:userId
  */
 router.post(

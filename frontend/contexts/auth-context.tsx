@@ -15,13 +15,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load user on app start
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    console.log("=== AuthContext Init ===");
+    console.log("Access Token:", token ? "exists" : "missing");
+
+    if (!token) {
+      console.log("No token, setting loading to false");
+      setLoading(false);
+      return;
+    }
+
     const loadUser = async () => {
       try {
-        const res = await authService.me();
-        setUser(res.data.user);
-      } catch {
+        console.log("Fetching user from /auth/me...");
+        const user = await authService.me();
+        console.log("User loaded:", user);
+        setUser(user);
+      } catch (error) {
+        console.error("Failed to load user:", error);
         setUser(null);
       } finally {
+        console.log("Setting loading to false");
         setLoading(false);
       }
     };
@@ -50,14 +65,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const res = await authService.login({ email, password });
-      const { user, accessToken, refreshToken } = res.data;
+      const data = await authService.login({ email, password });
+      const { user, accessToken, refreshToken } = data;
 
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
       setUser(user);
-      return {};
+      return { user }; // Return user for redirect logic
     } catch (error) {
       return { error: getErrorMessage(error) };
     }
@@ -92,6 +107,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const changePassword = async (newPassword: string) => {
+    try {
+      await authService.changePassword(newPassword);
+      return {};
+    } catch (error) {
+      return { error: getErrorMessage(error) };
+    }
+  };
+
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      await authService.resendVerification(email);
+      return {};
+    } catch (error: any) {
+      return {
+        error: getErrorMessage(error),
+      };
+    }
+  };
+
+  console.log("=== AuthContext State ===");
+  console.log("Loading:", loading);
+  console.log("User:", user);
+
   return (
     <AuthContext.Provider
       value={{
@@ -102,6 +141,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         forgotPassword,
         resetPassword,
+        resendVerificationEmail,
+        changePassword,
       }}
     >
       {children}

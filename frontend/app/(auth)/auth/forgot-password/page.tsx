@@ -9,7 +9,6 @@ import { ThemedButton } from "@/components/ui/themed-button";
 import { toast } from "sonner";
 import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { forgotPasswordSchema } from "@/lib/validators/auth";
-import { getErrorMessage } from "@/lib/api-error";
 
 export default function ForgotPasswordPage() {
   const { forgotPassword } = useAuth();
@@ -33,10 +32,10 @@ export default function ForgotPasswordPage() {
     setLoading(false);
 
     if (resetError) {
-      if (resetError.message?.includes("rate limit")) {
+      if (resetError.toLowerCase().includes("rate limit")) {
         toast.error("Too many requests. Please try again later.");
       } else {
-        toast.error(getErrorMessage(resetError));
+        toast.error(error);
       }
     } else {
       setSuccess(true);

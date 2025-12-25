@@ -51,7 +51,7 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (error) {
-      toast.error(getErrorMessage(error));
+      toast.error(error);
     } else {
       setSuccess(true);
     }

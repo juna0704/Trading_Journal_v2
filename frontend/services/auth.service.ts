@@ -10,30 +10,52 @@ export const authService = {
     return apiClient.post("/auth/register", data);
   },
 
-  login(data: { email: string; password: string }) {
-    return apiClient.post("/auth/login", data);
+  async login(data: { email: string; password: string }) {
+    const response = await apiClient.post("/auth/login", data);
+
+    if (!response.data?.success || !response.data?.data) {
+      throw new Error("Invalid Login response");
+    }
+
+    return response.data.data;
   },
 
   logout() {
-    return apiClient.post("/auth/logout");
+    const refreshToken = localStorage.getItem("refreshToken");
+    return apiClient.post("/auth/logout", { refreshToken });
   },
 
-  me() {
-    return apiClient.get("/auth/me");
+  async me() {
+    const response = await apiClient.get("/auth/me");
+
+    if (!response.data?.success || !response.data?.data) {
+      throw new Error("Invalid response from /auth/me");
+    }
+
+    // Return just the user object
+    return response.data.data.user;
+  },
+
+  changePassword(newPassword: string) {
+    return apiClient.post("/auth/change-password", { newPassword });
   },
 
   forgotPassword(email: string) {
-    return apiClient.post("/auth/forgot-password", { email });
+    return apiClient.post("/password/request-reset", { email });
   },
 
   resetPassword(token: string, newPassword: string) {
-    return apiClient.post("/auth/reset-password", {
+    return apiClient.post("/password/reset", {
       token,
       newPassword,
     });
   },
 
   verifyEmail(token: string) {
-    return apiClient.post("/auth/verify-email", { token });
+    return apiClient.get(`/auth/verify-email?token=${token}`);
+  },
+
+  resendVerification(email: string) {
+    return apiClient.post("/auth/resend-verification", { email });
   },
 };

@@ -67,3 +67,30 @@
     @apply backdrop-blur-lg bg-white/80 dark:bg-charcoal/80 border border-tan/40 dark:border-beige/30;
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply bg-[#151718] border border-white/5 shadow-2xl;
+  }
+
+  .active-nav-glow {
+    background: linear-gradient(
+      90deg,
+      rgba(243, 114, 59, 0.15) 0%,
+      rgba(46, 211, 183, 0.15) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+  }
+
+  .active-nav-glow::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 4px;
+    background: #f3723b;
+    border-radius: 0 4px 4px 0;
+  }
+}
