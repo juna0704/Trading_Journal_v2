@@ -1,7 +1,7 @@
 // backend/src/services/password.service.ts
 import argon2 from "argon2";
 import crypto from "crypto";
-import { AppError } from "../types/auth.types";
+import { AppError } from "../utils/errors";
 import { emailService } from "./email.service";
 import { logger, prisma } from "../config";
 

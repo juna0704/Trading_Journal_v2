@@ -4,6 +4,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
+  engineType = "client"
 }
 
 datasource db {
@@ -25,6 +26,7 @@ model User {
   passwordResetExpires     DateTime?
   
   role                     Role      @default(USER)
+  kycStatus                Boolean   @default(false)
   isActive                 Boolean   @default(true) @map("is_active")
   lastLoginAt              DateTime?
   
@@ -33,6 +35,7 @@ model User {
 
   refreshTokens RefreshToken[]
   trades        Trade[]
+  strategies    Strategy[]
   passwordResetAttempt      PasswordResetAttempt[]
 
 
@@ -87,27 +90,32 @@ model Trade {
   id            String    @id @default(cuid())
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   symbol        String
   side          TradeSide
-  status        TradeStatus @default(OPEN)
-
-  quantity      Decimal     @db.Decimal(18, 8)
   entryPrice    Decimal     @db.Decimal(18, 8)
   exitPrice     Decimal?    @db.Decimal(18, 8)
+  status        TradeStatus @default(OPEN)
+  quantity      Decimal     @db.Decimal(18, 8)
+  leverage      Int         @default(1)
+  fees          Decimal     @default(0) @db.Decimal(18, 8)
 
-  profitLoss    Decimal?    @db.Decimal(18, 8)
+  pnlNet          Decimal?   @db.Decimal(20, 8)
   pnlPercentage Decimal?    @db.Decimal(10, 4)
 
   stopLoss      Decimal?    @db.Decimal(18, 8)
   takeProfit    Decimal?    @db.Decimal(18, 8)
-  fees          Decimal     @default(0) @db.Decimal(18, 8)
+  
 
-  entryDate     DateTime
-  exitDate      DateTime?
+  entryTimestamp     DateTime
+  exitTimestamp      DateTime?
 
+  strategyId    String?
+  strategy      Strategy?  @relation(fields: [strategyId], references: [id], onDelete: SetNull)
   notes         String?   @db.Text
   tags          String[]
   screenshotUrl String?
+  tradeScore      Int?       // 1-100 logic
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -116,4 +124,32 @@ model Trade {
   @@index([symbol])
   @@index([status])
   @@map("trades")
+}
+
+model Strategy {
+  id        String   @id @default(uuid())
+  name      String   
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades    Trade[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([name, userId]) 
+  @@index([userId])
+}
+
+model NewsInsight {
+  id             String   @id @default(uuid())
+  symbol         String   
+  headline       String
+  summary        String   @db.Text
+  sentimentScore Decimal  @db.Decimal(3, 2) 
+  sourceUrl      String
+  publishedAt    DateTime
+  createdAt      DateTime @default(now())
+  
+  @@index([symbol])
+  @@index([publishedAt])
 }

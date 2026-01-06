@@ -1,8 +1,9 @@
 import { Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
-import { ApiResponse, AppError, AuthRequest } from "../types/auth.types";
+import { ApiResponse, AuthRequest } from "../types/auth.types";
 import { logger } from "../config";
 import { sanitizeUser } from "../utils/sanitizeUser";
+import { AppError } from "../utils/errors";
 
 const authService = new AuthService();
 
