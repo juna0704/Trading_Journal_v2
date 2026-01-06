@@ -1,39 +1,24 @@
-// backend/src/types/trade.types.ts
+import { Trade, TradeSide, TradeStatus } from "../generated/prisma";
 
-import { TradeSide, TradeStatus, Prisma } from "../generated/prisma/client";
+export { TradeSide, TradeStatus };
 
-export interface Trade {
-  id: string;
-  userId: string;
-  symbol: string;
-  side: TradeSide;
-  status: TradeStatus;
-  quantity: Prisma.Decimal;
-  entryPrice: Prisma.Decimal;
-  exitPrice: Prisma.Decimal | null;
-  profitLoss: Prisma.Decimal | null;
-  pnlPercentage: Prisma.Decimal | null;
-  stopLoss: Prisma.Decimal | null;
-  takeProfit: Prisma.Decimal | null;
-  fees: Prisma.Decimal;
-  entryDate: Date;
-  exitDate: Date | null;
-  notes: string | null;
-  tags: string[];
-  screenshotUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Base Trade type from Prisma
+export type TradeType = Trade;
 
+// Request types for API
 export interface CreateTradeRequest {
   symbol: string;
   side: TradeSide;
-  quantity: number;
   entryPrice: number;
-  entryDate: Date | string;
+  exitPrice?: number;
+  quantity: number;
+  leverage?: number;
+  fees?: number;
   stopLoss?: number;
   takeProfit?: number;
-  fees?: number;
+  entryTimestamp: string; // ISO 8601 date string
+  exitTimestamp?: string; // ISO 8601 date string
+  strategyId?: string;
   notes?: string;
   tags?: string[];
   screenshotUrl?: string;
@@ -41,54 +26,46 @@ export interface CreateTradeRequest {
 
 export interface UpdateTradeRequest {
   symbol?: string;
-  quantity?: number;
+  side?: TradeSide;
   entryPrice?: number;
   exitPrice?: number;
-  entryDate?: Date | string;
-  exitDate?: Date | string;
+  quantity?: number;
+  leverage?: number;
+  fees?: number;
   stopLoss?: number;
   takeProfit?: number;
-  fees?: number;
+  entryTimestamp?: string;
+  exitTimestamp?: string;
+  strategyId?: string;
   notes?: string;
   tags?: string[];
   screenshotUrl?: string;
-  status?: TradeStatus;
+  tradeScore?: number;
 }
 
-export interface CloseTradeRequest {
-  exitPrice: number;
-  exitDate: Date | string;
-  fees?: number;
-  notes?: string;
-}
-
-export interface TradeFilters {
-  status?: TradeStatus;
-  side?: TradeSide;
-  symbol?: string;
-  startDate?: Date | string;
-  endDate?: Date | string;
-  minPnl?: number;
-  maxPnl?: number;
-  tags?: string[];
-}
-
-export interface TradeListResponse {
-  trades: Trade[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-export interface TradeStats {
-  totalTrades: number;
-  winningTrades: number;
-  losingTrades: number;
-  winRate: number;
-  totalPnl: number;
-  averagePnl: number;
-  largestWin: number;
-  largestLoss: number;
-  totalFees: number;
+// Response type
+export interface TradeResponse {
+  id: string;
+  userId: string;
+  symbol: string;
+  side: TradeSide;
+  entryPrice: string;
+  exitPrice: string | null;
+  status: TradeStatus;
+  quantity: string;
+  leverage: number;
+  fees: string;
+  pnlNet: string | null;
+  pnlPercentage: string | null;
+  stopLoss: string | null;
+  takeProfit: string | null;
+  entryTimestamp: string;
+  exitTimestamp: string | null;
+  strategyId: string | null;
+  notes: string | null;
+  tags: string[];
+  screenshotUrl: string | null;
+  tradeScore: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
