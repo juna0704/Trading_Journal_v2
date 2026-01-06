@@ -2,7 +2,8 @@
 import argon2 from "argon2";
 import crypto from "crypto";
 import { prisma } from "../config";
-import { AppError, AuthTokens, User } from "../types/auth.types";
+import { AuthTokens, User } from "../types/auth.types";
+import { AppError } from "../utils/errors";
 import {
   RegisterInput,
   LoginInput,

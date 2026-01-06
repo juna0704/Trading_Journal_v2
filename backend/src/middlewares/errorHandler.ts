@@ -1,8 +1,9 @@
 // backend/src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
-import { AppError, ApiResponse } from "../types/auth.types";
+import { ApiResponse } from "../types/auth.types";
 import { logger, env } from "../config";
 import { Prisma } from "../generated/prisma/client";
+import { AppError } from "../utils/errors";
 
 export const errorHandler = (
   err: Error,
@@ -25,7 +26,6 @@ export const errorHandler = (
       error: {
         code: err.code,
         message: err.message,
-        details: err.details,
       },
     };
     res.status(err.statusCode).json(response);

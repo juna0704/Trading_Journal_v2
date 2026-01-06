@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { AnyZodObject, ZodError } from "zod";
-import { AppError } from "../types/auth.types";
+import { ZodTypeAny, ZodError } from "zod";
+import { AppError } from "../utils/errors";
 
-export const validate = (schema: AnyZodObject) => {
+export const validate = (schema: ZodTypeAny) => {
   return async (
     req: Request,
     res: Response,
@@ -14,9 +14,11 @@ export const validate = (schema: AnyZodObject) => {
         query: req.query,
         params: req.params,
       });
+
       req.body = parsed.body;
       req.query = parsed.query;
       req.params = parsed.params;
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -24,9 +26,8 @@ export const validate = (schema: AnyZodObject) => {
           field: err.path.join("."),
           message: err.message,
         }));
-        next(
-          new AppError(400, "VALIDATION_ERROR", "validation failed", { errors })
-        );
+
+        next(new AppError(400, "VALIDATION_ERROR", "validation failed"));
       } else {
         next(error);
       }
