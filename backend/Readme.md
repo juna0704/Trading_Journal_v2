@@ -69,7 +69,7 @@ trading-journal/
 
 ## 📚 API Documentation
 
-Complete API documentation with detailed endpoint specifications, request/response examples, error codes, and frontend integration guidelines is available in the [API Documentation](./API_DOCUMENTATION.md) file.
+Complete API documentation with detailed endpoint specifications, request/response examples, error codes, and frontend integration guidelines is available in the [API Documentation](../backend/Docs/API.md) file.
 
 **Key Documentation Sections:**
 
