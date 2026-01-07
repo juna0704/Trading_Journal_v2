@@ -62,7 +62,7 @@ app.get("/api/live", (_req: Request, res: Response) => {
 });
 
 // API Routes
-app.use("/api", apiRoutes);
+app.use("/api/v2", apiRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
