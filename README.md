@@ -50,7 +50,7 @@ trading-journal/
 
 ### 🔙 Backend Documentation
 
-👉 **[Backend README](backend/README.md)**
+👉 **[Backend README](backend/Readme.md)**
 Includes:
 
 - API overview
@@ -63,7 +63,7 @@ Includes:
 
 ### 🎨 Frontend Documentation
 
-👉 **[Frontend README](frontend/README.md)**
+👉 **[Frontend README](frontend/Readme.md)**
 Includes:
 
 - Frontend setup instructions
