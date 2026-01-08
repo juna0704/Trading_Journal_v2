@@ -92,9 +92,20 @@ The backend exposes public system endpoints for monitoring:
 - `/api/live` → API availability
 - Centralized error handling (404, auth, validation)
 
-These make the app **deployment-ready** for Docker, CI/CD, and cloud hosting.
+### 📘 API Documentation (OpenAPI / Swagger)
 
----
+Interactive API documentation is available via Swagger UI:
+
+- **Swagger UI:** http://localhost:5000/docs
+
+This documentation provides:
+
+- Complete OpenAPI 3.0 specification
+- Request/response schemas
+- Authentication via JWT (Bearer)
+- Try-it-out support for all endpoints
+
+## These features make the application **deployment-ready** for Docker, CI/CD pipelines, and cloud hosting.
 
 ## 🚀 Quick Start (Development)
 
