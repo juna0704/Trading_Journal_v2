@@ -81,11 +81,18 @@ export class TradeService {
     userId: string,
     data: CreateTradeRequest
   ): Promise<TradeResponse> {
+    const strategyId =
+      typeof data.strategyId === "string" &&
+      data.strategyId.trim() !== "" &&
+      data.strategyId !== "null"
+        ? data.strategyId
+        : null;
+
     // Validate strategy belongs to user if provided
-    if (data.strategyId) {
+    if (strategyId !== null) {
       const strategy = await prisma.strategy.findFirst({
         where: {
-          id: data.strategyId,
+          id: strategyId,
           userId: userId,
         },
       });
@@ -139,7 +146,7 @@ export class TradeService {
           : null,
         entryTimestamp: new Date(data.entryTimestamp),
         exitTimestamp: data.exitTimestamp ? new Date(data.exitTimestamp) : null,
-        strategyId: data.strategyId,
+        strategyId: strategyId,
         notes: data.notes,
         tags: data.tags || [],
         screenshotUrl: data.screenshotUrl,
@@ -156,6 +163,7 @@ export class TradeService {
     const trades = await prisma.trade.findMany({
       where: {
         userId,
+        deletedAt: null,
       },
       orderBy: {
         entryTimestamp: "desc",
@@ -173,6 +181,7 @@ export class TradeService {
       where: {
         id: tradeId,
         userId,
+        deletedAt: null,
       },
     });
 
@@ -198,7 +207,7 @@ export class TradeService {
       endDate,
     } = params;
 
-    const where: Prisma.TradeWhereInput = { userId };
+    const where: Prisma.TradeWhereInput = { userId, deletedAt: null };
 
     // Advanced filters
     if (status) {
@@ -251,11 +260,20 @@ export class TradeService {
     tradeId: string,
     data: UpdateTradeRequest
   ): Promise<TradeResponse> {
+    const strategyId =
+      data.strategyId === undefined
+        ? undefined
+        : typeof data.strategyId === "string" &&
+            data.strategyId.trim() !== "" &&
+            data.strategyId !== "null"
+          ? data.strategyId
+          : null;
     // Check if trade exists and belongs to user
     const existingTrade = await prisma.trade.findFirst({
       where: {
         id: tradeId,
         userId,
+        deletedAt: null,
       },
     });
 
@@ -264,22 +282,21 @@ export class TradeService {
     }
 
     // Validate strategy belongs to user if provided
-    if (data.strategyId !== undefined) {
-      if (data.strategyId) {
-        const strategy = await prisma.strategy.findFirst({
-          where: {
-            id: data.strategyId,
-            userId: userId,
-          },
-        });
 
-        if (!strategy) {
-          throw new AppError(
-            404,
-            "STRATEGY_NOT_FOUND",
-            "Strategy not found or does not belong to you"
-          );
-        }
+    if (typeof strategyId === "string") {
+      const strategy = await prisma.strategy.findFirst({
+        where: {
+          id: strategyId,
+          userId,
+        },
+      });
+
+      if (!strategy) {
+        throw new AppError(
+          404,
+          "STRATEGY_NOT_FOUND",
+          "Strategy not found or does not belong to you"
+        );
       }
     }
 
@@ -320,15 +337,15 @@ export class TradeService {
     }
 
     // Handle strategy relation properly
-    if (data.strategyId !== undefined) {
-      if (data.strategyId === null) {
+    if (strategyId !== undefined) {
+      if (strategyId === null) {
         updateData.strategy = {
           disconnect: true,
         };
       } else {
         updateData.strategy = {
           connect: {
-            id: data.strategyId,
+            id: strategyId,
           },
         };
       }
@@ -385,21 +402,24 @@ export class TradeService {
     const trade = await prisma.trade.update({
       where: {
         id: tradeId,
+        deletedAt: null,
       },
       data: updateData,
     });
 
     return this.toTradeResponse(trade);
   }
+
   /**
-   * Delete a trade
+   * Soft Delete a trade
    */
-  async deleteTrade(userId: string, tradeId: string): Promise<void> {
+  async softDeleteTrade(userId: string, tradeId: string): Promise<void> {
     // Check if trade exists and belongs to user
     const trade = await prisma.trade.findFirst({
       where: {
         id: tradeId,
         userId,
+        deletedAt: null,
       },
     });
 
@@ -408,10 +428,80 @@ export class TradeService {
     }
 
     // Delete trade
-    await prisma.trade.delete({
+    await prisma.trade.update({
+      where: { id: tradeId },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Restore Deleted trade (UNDO)
+   */
+
+  async restoreTrade(userId: string, tradeId: string): Promise<void> {
+    const trade = await prisma.trade.findFirst({
       where: {
         id: tradeId,
+        userId,
+        deletedAt: { not: null },
       },
+    });
+
+    if (!trade) {
+      throw new AppError(404, "TRADE_NOT_FOUND", "Deleted trade not found");
+    }
+
+    await prisma.trade.update({
+      where: { id: tradeId },
+      data: { deletedAt: null },
+    });
+  }
+
+  /**
+   * List Deleted trades(Trash)
+   */
+  async getDeletedTrades(userId: string) {
+    return prisma.trade.findMany({
+      where: {
+        userId,
+        deletedAt: { not: null },
+      },
+      orderBy: { deletedAt: "desc" },
+    });
+  }
+
+  /**
+   * Permanennt delete(System/Admin)
+   */
+  async permanentDeleteTrade(
+    tradeId: string,
+    role: "ADMIN" | "SUPER_ADMIN"
+  ): Promise<void> {
+    if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+      throw new AppError(
+        403,
+        "FORBIDDEN",
+        "You are not allowed to permanently delete trades"
+      );
+    }
+
+    const trade = await prisma.trade.findFirst({
+      where: {
+        id: tradeId,
+        deletedAt: { not: null },
+      },
+    });
+
+    if (!trade) {
+      throw new AppError(
+        404,
+        "TRADE_NOT_FOUND",
+        "Trade must be soft-deleted before permanent deletion"
+      );
+    }
+
+    await prisma.trade.delete({
+      where: { id: tradeId },
     });
   }
 
@@ -423,6 +513,7 @@ export class TradeService {
       where: {
         userId,
         status: TradeStatus.CLOSED,
+        deletedAt: null,
       },
     });
 

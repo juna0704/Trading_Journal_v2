@@ -70,7 +70,12 @@ const tradeCreatePayload = z
       .datetime("Invalid exit timestamp format")
       .optional(),
 
-    strategyId: z.string().uuid("Invalid strategy ID").optional(),
+    strategyId: z
+      .string()
+      .uuid("Invalid strategy ID")
+      .optional()
+      .nullable()
+      .transform((val) => (val === "" ? null : val)),
 
     notes: z
       .string()

@@ -103,6 +103,8 @@ model Trade {
   pnlNet          Decimal?   @db.Decimal(20, 8)
   pnlPercentage Decimal?    @db.Decimal(10, 4)
 
+  deletedAt      DateTime?
+
   stopLoss      Decimal?    @db.Decimal(18, 8)
   takeProfit    Decimal?    @db.Decimal(18, 8)
   
@@ -123,6 +125,7 @@ model Trade {
   @@index([userId])
   @@index([symbol])
   @@index([status])
+  @@index([deletedAt])
   @@map("trades")
 }
 

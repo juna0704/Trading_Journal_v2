@@ -33,9 +33,9 @@ info:
 servers:
   - url: http://localhost:5000
     description: Development environment
-  - url: https://api-staging.tradingjournal.com
+  - url: https://***********
     description: Staging environment
-  - url: https://api.tradingjournal.com
+  - url: https://*************
     description: Production environment
 
 tags:
@@ -44,7 +44,9 @@ tags:
   - name: User Management
     description: User registration, verification, and profile management
   - name: Admin Operations
-    description: Administrative functions (ADMIN or SUPER_ADMIN role required)
+    description: Administrative functions.
+      Requires authentication via `/api/v2/auth/login`
+      and a JWT with role `ADMIN` or `SUPER_ADMIN`.
   - name: Trade Management
     description: Trade creation, retrieval, updating, and deletion
   - name: Password Management
@@ -1457,5 +1459,3 @@ paths:
                     timestamp: "2026-01-07T07:30:00.000Z"
                     uptime: 86400.25
                     environment: "development"
-
- 
