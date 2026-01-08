@@ -1,0 +1,1546 @@
+openapi: 3.0.3
+info:
+  title: Trading Journal API
+  description: |
+    Comprehensive API for managing trading journals, user accounts, and trade analysis.
+    Follows RESTful principles with JWT authentication and role-based access control.
+
+    **Version:** 2.1.0  
+    **Last Updated:** January 7, 2026
+    **Base URL:** `http://localhost:5000`
+
+    **Target Audience:**
+    - Frontend Engineers
+    - Mobile Developers
+    - QA Engineers
+    - DevOps Team
+
+    **Prerequisites:**
+    - Node.js 18+ or Bun runtime
+    - PostgreSQL database
+    - JWT understanding
+  version: "2.1.0"
+  contact:
+    name: API Support
+    email: api-support@tradingjournal.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-document-id: API-DOC-TJ-2026-001
+  x-revision: 2.0
+  x-valid-until: 2026-06-07
+
+servers:
+  - url: http://localhost:5000
+    description: Development environment
+  - url: https://api-staging.tradingjournal.com
+    description: Staging environment
+  - url: https://api.tradingjournal.com
+    description: Production environment
+
+tags:
+  - name: Authentication
+    description: User authentication and token management
+  - name: User Management
+    description: User registration, verification, and profile management
+  - name: Admin Operations
+    description: Administrative functions (ADMIN or SUPER_ADMIN role required)
+  - name: Trade Management
+    description: Trade creation, retrieval, updating, and deletion
+  - name: Password Management
+    description: Password reset and recovery
+  - name: System Status
+    description: API health and status checks
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token for API authorization (30 minute validity)
+  schemas:
+    # User-related schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "095db4d1-af6f-4ee2-a55b-c835d1461304"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        firstName:
+          type: string
+          maxLength: 50
+          example: "John"
+        lastName:
+          type: string
+          maxLength: 50
+          example: "Doe"
+        role:
+          type: string
+          enum: [USER, ADMIN, SUPER_ADMIN]
+          example: "USER"
+        isEmailVerified:
+          type: boolean
+          example: true
+        isActive:
+          type: boolean
+          example: true
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-01-07T07:08:17.139Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-07T05:26:47.341Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-07T07:08:17.141Z"
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          minLength: 8
+          pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"
+          description: "Must contain at least 1 uppercase, 1 lowercase, and 1 number"
+          example: "StrongPass123"
+        firstName:
+          type: string
+          maxLength: 50
+          example: "John"
+        lastName:
+          type: string
+          maxLength: 50
+          example: "Doe"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          example: "StrongPass123"
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    # Trade-related schemas
+    TradeSide:
+      type: string
+      enum: [LONG, SHORT]
+
+    TradeStatus:
+      type: string
+      enum: [OPEN, CLOSED]
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "clxxx123456"
+        userId:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+          pattern: "^[A-Z0-9]{1,10}$"
+          example: "BTCUSDT"
+        side:
+          $ref: "#/components/schemas/TradeSide"
+        status:
+          $ref: "#/components/schemas/TradeStatus"
+        entryPrice:
+          type: string
+          format: decimal
+          example: "50000.00"
+        exitPrice:
+          type: string
+          format: decimal
+          nullable: true
+          example: "52000.00"
+        quantity:
+          type: string
+          format: decimal
+          example: "0.1"
+        leverage:
+          type: integer
+          minimum: 1
+          maximum: 125
+          default: 1
+          example: 10
+        fees:
+          type: string
+          format: decimal
+          default: "0.00"
+          example: "5.50"
+        pnlNet:
+          type: string
+          format: decimal
+          nullable: true
+          example: "1994.50"
+        pnlPercentage:
+          type: string
+          format: decimal
+          nullable: true
+          example: "39.89"
+        stopLoss:
+          type: string
+          format: decimal
+          nullable: true
+          example: "48000.00"
+        takeProfit:
+          type: string
+          format: decimal
+          nullable: true
+          example: "55000.00"
+        entryTimestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:00:00.000Z"
+        exitTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-15T15:00:00.000Z"
+        strategyId:
+          type: string
+          format: uuid
+          nullable: true
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+          example: "Good trade setup, followed the plan"
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          maxItems: 10
+          default: []
+          example: ["breakout", "high-volume"]
+        screenshotUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/screenshot.png"
+        tradeScore:
+          type: integer
+          minimum: 1
+          maximum: 100
+          nullable: true
+          example: 85
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T16:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T16:00:00.000Z"
+
+    CreateTradeRequest:
+      type: object
+      required:
+        - symbol
+        - side
+        - entryPrice
+        - quantity
+        - entryTimestamp
+      properties:
+        symbol:
+          type: string
+          pattern: "^[A-Z0-9]{1,10}$"
+          example: "BTCUSDT"
+        side:
+          $ref: "#/components/schemas/TradeSide"
+        entryPrice:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000000
+          example: 50000
+        exitPrice:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000000
+          nullable: true
+          example: 52000
+        quantity:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000
+          example: 0.1
+        leverage:
+          type: integer
+          minimum: 1
+          maximum: 125
+          default: 1
+          example: 10
+        fees:
+          type: number
+          minimum: 0
+          default: 0
+          example: 5.5
+        stopLoss:
+          type: number
+          minimum: 0.00000001
+          nullable: true
+          example: 48000
+        takeProfit:
+          type: number
+          minimum: 0.00000001
+          nullable: true
+          example: 55000
+        entryTimestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:00:00.000Z"
+        exitTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-15T15:00:00.000Z"
+        strategyId:
+          type: string
+          format: uuid
+          nullable: true
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+          example: "Good trade setup, followed the plan"
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          maxItems: 10
+          default: []
+          example: ["breakout", "high-volume"]
+        screenshotUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/screenshot.png"
+        tradeScore:
+          type: integer
+          minimum: 1
+          maximum: 100
+          nullable: true
+          example: 85
+
+    UpdateTradeRequest:
+      type: object
+      properties:
+        symbol:
+          type: string
+          pattern: "^[A-Z0-9]{1,10}$"
+        side:
+          $ref: "#/components/schemas/TradeSide"
+        entryPrice:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000000
+        exitPrice:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000000
+          nullable: true
+        quantity:
+          type: number
+          minimum: 0.00000001
+          maximum: 1000000
+        leverage:
+          type: integer
+          minimum: 1
+          maximum: 125
+        fees:
+          type: number
+          minimum: 0
+        stopLoss:
+          type: number
+          minimum: 0.00000001
+          nullable: true
+        takeProfit:
+          type: number
+          minimum: 0.00000001
+          nullable: true
+        entryTimestamp:
+          type: string
+          format: date-time
+        exitTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        strategyId:
+          type: string
+          format: uuid
+          nullable: true
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          maxItems: 10
+        screenshotUrl:
+          type: string
+          format: uri
+          nullable: true
+        tradeScore:
+          type: integer
+          minimum: 1
+          maximum: 100
+          nullable: true
+
+    PaginatedTrades:
+      type: object
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 25
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            totalPages:
+              type: integer
+              example: 2
+
+    TradeStats:
+      type: object
+      properties:
+        totalTrades:
+          type: integer
+          example: 25
+        winningTrades:
+          type: integer
+          example: 15
+        losingTrades:
+          type: integer
+          example: 10
+        winRate:
+          type: number
+          format: float
+          example: 60.0
+        totalPnL:
+          type: number
+          format: float
+          example: 5420.75
+        avgPnL:
+          type: number
+          format: float
+          example: 216.83
+        bestTrade:
+          type: object
+          properties:
+            id:
+              type: string
+            symbol:
+              type: string
+            pnlNet:
+              type: number
+        worstTrade:
+          type: object
+          properties:
+            id:
+              type: string
+            symbol:
+              type: string
+            pnlNet:
+              type: number
+
+    # System schemas
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "OK"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-07T07:30:00.000Z"
+        uptime:
+          type: number
+          format: float
+          example: 86400.25
+        environment:
+          type: string
+          example: "development"
+
+    # Response wrappers
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          oneOf:
+            - type: object
+            - type: array
+            - type: string
+            - type: string
+        message:
+          type: string
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              nullable: true
+
+    # Common error schemas
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+  parameters:
+    userIdPath:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID of the user
+
+    tradeIdPath:
+      name: tradeId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of the trade
+
+    paginationPage:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination
+
+    paginationLimit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Items per page
+
+    tradeStatusFilter:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/TradeStatus"
+      description: Filter trades by status
+
+    tradeSideFilter:
+      name: side
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/TradeSide"
+      description: Filter trades by side
+
+    symbolFilter:
+      name: symbol
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter trades by symbol
+
+    startDateFilter:
+      name: startDate
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: Filter trades after this date
+
+    endDateFilter:
+      name: endDate
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: Filter trades before this date
+
+    sortByParam:
+      name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+        default: "entryTimestamp"
+        enum: [entryTimestamp, exitTimestamp, createdAt, pnlNet]
+      description: Field to sort by
+
+    sortOrderParam:
+      name: order
+      in: query
+      required: false
+      schema:
+        type: string
+        default: "desc"
+        enum: [asc, desc]
+      description: Sort order
+
+  responses:
+    UnauthorizedError:
+      description: Invalid or missing authentication token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponse"
+            example:
+              success: false
+              error:
+                code: "UNAUTHORIZED"
+                message: "Invalid or missing authentication token"
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponse"
+            example:
+              success: false
+              error:
+                code: "FORBIDDEN"
+                message: "Insufficient permissions to access this resource"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponse"
+            example:
+              success: false
+              error:
+                code: "NOT_FOUND"
+                message: "Resource not found"
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponse"
+            example:
+              success: false
+              error:
+                code: "VALIDATION_ERROR"
+                message: "Validation failed"
+                details:
+                  errors:
+                    - field: "body.email"
+                      message: "Invalid email format"
+                    - field: "body.password"
+                      message: "Password must be at least 8 characters"
+
+paths:
+  # Authentication endpoints
+  /api/v2/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      description: |
+        Register a new user account. The account will require admin approval before becoming active.
+        An email verification link will be sent to the provided email address.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registration submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  message: "Registration submitted. Your account will be activated after admin approval."
+                  data:
+                    user:
+                      id: "095db4d1-af6f-4ee2-a55b-c835d1461304"
+                      email: "user@example.com"
+                      firstName: "John"
+                      lastName: "Doe"
+                      role: "USER"
+                      isEmailVerified: false
+                      isActive: false
+                      lastLoginAt: null
+                      createdAt: "2026-01-07T05:29:18.411Z"
+                      updatedAt: "2026-01-07T05:29:18.411Z"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  error:
+                    code: "CONFLICT"
+                    message: "Email already registered"
+
+  /api/v2/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      description: Authenticate user and return access and refresh tokens
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    user:
+                      id: "cdd47d43-0f0e-4681-8f57-4fc80294aa9d"
+                      email: "user@example.com"
+                      firstName: "John"
+                      lastName: "Doe"
+                      isEmailVerified: true
+                      isActive: true
+                      role: "USER"
+                      lastLoginAt: "2026-01-07T07:08:17.139Z"
+                      createdAt: "2026-01-07T05:26:47.341Z"
+                      updatedAt: "2026-01-07T07:08:17.141Z"
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  error:
+                    code: "UNAUTHORIZED"
+                    message: "Invalid email or password"
+
+  /api/v2/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      description: Get the profile of the currently authenticated user
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    user:
+                      id: "cdd47d43-0f0e-4681-8f57-4fc80294aa9d"
+                      email: "user@example.com"
+                      firstName: "John"
+                      lastName: "Doe"
+                      isEmailVerified: true
+                      isActive: true
+                      role: "USER"
+                      lastLoginAt: "2026-01-07T07:08:17.139Z"
+                      createdAt: "2026-01-07T05:26:47.341Z"
+                      updatedAt: "2026-01-07T07:08:17.141Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/v2/auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Use refresh token to obtain a new access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: New tokens generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/v2/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      description: Invalidate refresh token and logout user
+      operationId: logoutUser
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    message: "Logged out successfully"
+
+  /api/v2/auth/resend-verification:
+    post:
+      tags: [Authentication]
+      summary: Resend verification email
+      description: Resend email verification link to user
+      operationId: resendVerificationEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        "200":
+          description: Verification email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    message: "Verification email sent"
+
+  /api/auth/verify-email:
+    get:
+      tags: [User Management]
+      summary: Verify email address
+      description: Verify user's email address using token sent via email
+      operationId: verifyEmail
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Verification token from email
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    message: "Email verified successfully"
+
+  # Admin endpoints (require ADMIN or SUPER_ADMIN role)
+  /api/v2/admin/pending-users:
+    get:
+      tags: [Admin Operations]
+      summary: Get pending user registrations
+      description: Get list of users waiting for admin approval (ADMIN or SUPER_ADMIN role required)
+      operationId: getPendingUsers
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of pending users retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    users:
+                      - id: "user-id"
+                        email: "pendinguser@example.com"
+                        firstName: "Jane"
+                        lastName: "Doe"
+                        role: "USER"
+                        isEmailVerified: false
+                        isActive: false
+                        createdAt: "2026-01-07T05:29:18.411Z"
+                    count: 1
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v2/admin/approve/{userId}:
+    post:
+      tags: [Admin Operations]
+      summary: Approve user registration
+      description: Approve a pending user registration (ADMIN or SUPER_ADMIN role required)
+      operationId: approveUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/userIdPath"
+      responses:
+        "200":
+          description: User approved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  message: "User approved successfully"
+                  data:
+                    user:
+                      id: "user-id"
+                      email: "user@example.com"
+                      isActive: true
+                      updatedAt: "2026-01-07T07:25:26.786Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v2/admin/deactivate/{userId}:
+    post:
+      tags: [Admin Operations]
+      summary: Deactivate user account
+      description: Deactivate a user account (Cannot deactivate SUPER_ADMIN accounts)
+      operationId: deactivateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/userIdPath"
+      responses:
+        "200":
+          description: User deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  message: "User deactivated successfully"
+                  data:
+                    user:
+                      id: "cdd47d43-0f0e-4681-8f57-4fc80294aa9d"
+                      email: "user@example.com"
+                      isActive: false
+                      updatedAt: "2026-01-07T07:23:40.310Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v2/admin/activate/{userId}:
+    post:
+      tags: [Admin Operations]
+      summary: Activate user account
+      description: Activate a deactivated user account
+      operationId: activateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/userIdPath"
+      responses:
+        "200":
+          description: User activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  message: "User activated successfully"
+                  data:
+                    user:
+                      id: "cdd47d43-0f0e-4681-8f57-4fc80294aa9d"
+                      email: "user@example.com"
+                      isActive: true
+                      updatedAt: "2026-01-07T07:25:26.786Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  # Trade management endpoints
+  /api/v2/trades:
+    post:
+      tags: [Trade Management]
+      summary: Create a new trade
+      description: Create a new trade entry. Trade status will be OPEN if exitPrice is not provided.
+      operationId: createTrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTradeRequest"
+      responses:
+        "201":
+          description: Trade created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    id: "clxxx123456"
+                    userId: "user-uuid"
+                    symbol: "BTCUSDT"
+                    side: "LONG"
+                    entryPrice: "50000"
+                    exitPrice: "52000"
+                    status: "CLOSED"
+                    quantity: "0.1"
+                    leverage: 10
+                    fees: "5.50"
+                    pnlNet: "1994.50"
+                    pnlPercentage: "39.89"
+                    stopLoss: "48000"
+                    takeProfit: "55000"
+                    entryTimestamp: "2024-01-15T10:00:00.000Z"
+                    exitTimestamp: "2024-01-15T15:00:00.000Z"
+                    strategyId: "strategy-uuid"
+                    notes: "Good trade setup, followed the plan"
+                    tags: ["breakout", "high-volume"]
+                    screenshotUrl: "https://example.com/screenshot.png"
+                    tradeScore: 85
+                    createdAt: "2024-01-15T16:00:00.000Z"
+                    updatedAt: "2024-01-15T16:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+    get:
+      tags: [Trade Management]
+      summary: Get all trades
+      description: Get paginated list of trades with optional filtering
+      operationId: getTrades
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tradeStatusFilter"
+        - $ref: "#/components/parameters/tradeSideFilter"
+        - $ref: "#/components/parameters/symbolFilter"
+        - $ref: "#/components/parameters/startDateFilter"
+        - $ref: "#/components/parameters/endDateFilter"
+        - $ref: "#/components/parameters/paginationPage"
+        - $ref: "#/components/parameters/paginationLimit"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/sortOrderParam"
+      responses:
+        "200":
+          description: Trades retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    trades:
+                      - id: "clxxx123456"
+                        symbol: "BTCUSDT"
+                        side: "LONG"
+                        status: "CLOSED"
+                        entryPrice: "50000"
+                        exitPrice: "52000"
+                        quantity: "0.1"
+                        pnlNet: "1994.50"
+                        pnlPercentage: "39.89"
+                        entryTimestamp: "2024-01-15T10:00:00.000Z"
+                        exitTimestamp: "2024-01-15T15:00:00.000Z"
+                        createdAt: "2024-01-15T16:00:00.000Z"
+                    pagination:
+                      total: 25
+                      page: 1
+                      limit: 20
+                      totalPages: 2
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/v2/trades/{tradeId}:
+    get:
+      tags: [Trade Management]
+      summary: Get single trade
+      description: Get detailed information about a specific trade
+      operationId: getTrade
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tradeIdPath"
+      responses:
+        "200":
+          description: Trade retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    id: "clxxx123456"
+                    userId: "user-uuid"
+                    symbol: "BTCUSDT"
+                    side: "LONG"
+                    entryPrice: "50000"
+                    exitPrice: "52000"
+                    status: "CLOSED"
+                    quantity: "0.1"
+                    leverage: 10
+                    fees: "5.50"
+                    pnlNet: "1994.50"
+                    pnlPercentage: "39.89"
+                    stopLoss: "48000"
+                    takeProfit: "55000"
+                    entryTimestamp: "2024-01-15T10:00:00.000Z"
+                    exitTimestamp: "2024-01-15T15:00:00.000Z"
+                    strategyId: null
+                    notes: "Good trade setup"
+                    tags: ["breakout"]
+                    screenshotUrl: null
+                    tradeScore: 85
+                    createdAt: "2024-01-15T16:00:00.000Z"
+                    updatedAt: "2024-01-15T16:00:00.000Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+    put:
+      tags: [Trade Management]
+      summary: Update trade
+      description: Update an existing trade (partial update supported)
+      operationId: updateTrade
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tradeIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTradeRequest"
+              example:
+                exitPrice: 53000
+                exitTimestamp: "2024-01-15T16:00:00.000Z"
+                notes: "Updated: Trade went better than expected"
+                tradeScore: 90
+      responses:
+        "200":
+          description: Trade updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    id: "clxxx123456"
+                    symbol: "BTCUSDT"
+                    side: "LONG"
+                    entryPrice: "50000"
+                    exitPrice: "53000"
+                    status: "CLOSED"
+                    quantity: "0.1"
+                    leverage: 10
+                    fees: "5.50"
+                    pnlNet: "2994.50"
+                    pnlPercentage: "59.89"
+                    entryTimestamp: "2024-01-15T10:00:00.000Z"
+                    exitTimestamp: "2024-01-15T16:00:00.000Z"
+                    notes: "Updated: Trade went better than expected"
+                    tradeScore: 90
+                    updatedAt: "2024-01-15T17:00:00.000Z"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+    delete:
+      tags: [Trade Management]
+      summary: Delete trade
+      description: Delete a trade permanently
+      operationId: deleteTrade
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tradeIdPath"
+      responses:
+        "200":
+          description: Trade deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  message: "Trade deleted successfully"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v2/trades/stats:
+    get:
+      tags: [Trade Management]
+      summary: Get trade statistics
+      description: Get comprehensive statistics about trades (only includes CLOSED trades)
+      operationId: getTradeStats
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/startDateFilter"
+        - $ref: "#/components/parameters/endDateFilter"
+        - $ref: "#/components/parameters/symbolFilter"
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    totalTrades: 25
+                    winningTrades: 15
+                    losingTrades: 10
+                    winRate: 60.0
+                    totalPnL: 5420.75
+                    avgPnL: 216.83
+                    bestTrade:
+                      id: "clxxx123456"
+                      symbol: "BTCUSDT"
+                      pnlNet: 1500.5
+                    worstTrade:
+                      id: "clxxx123457"
+                      symbol: "ETHUSDT"
+                      pnlNet: -450.25
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  # Password management endpoints
+  /api/v2/password/request-reset:
+    post:
+      tags: [Password Management]
+      summary: Request password reset
+      description: Request a password reset link to be sent to email
+      operationId: requestPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        "200":
+          description: Password reset link sent if email exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    message: "If an account exists with this email, you will receive a password reset link."
+
+  /api/v2/password/reset:
+    post:
+      tags: [Password Management]
+      summary: Reset password
+      description: Reset password using token from email
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                  example: "c5ab884a6451ab391207d8040bb5f7b78bdf43538b7506d4e3e1732918d86987"
+                newPassword:
+                  type: string
+                  minLength: 8
+                  pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"
+                  example: "NewStrongPass123"
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    message: "Password reset successful. Please login with your new password."
+
+  # System status endpoints
+  /health:
+    get:
+      tags: [System Status]
+      summary: Health check
+      description: Check API health status
+      operationId: healthCheck
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    status: "OK"
+                    timestamp: "2026-01-07T07:30:00.000Z"
+                    uptime: 86400.25
+                    environment: "development"
+
+  /api/live:
+    get:
+      tags: [System Status]
+      summary: API live status
+      description: Check if API is live and operational
+      operationId: apiLiveStatus
+      responses:
+        "200":
+          description: API is live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: true
+                  data:
+                    status: "Live"
+                    timestamp: "2026-01-07T07:30:00.000Z"
+                    uptime: 86400.25
+                    environment: "development"
+
+  # Catch-all for undefined routes
+  /{path+}:
+    get:
+      tags: [System Status]
+      summary: 404 Handler
+      description: Catch-all route for undefined endpoints
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "404":
+          description: Route not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  message: "Route not found"
+                  path: "/api/nonexistent"
+    post:
+      tags: [System Status]
+      summary: 404 Handler
+      description: Catch-all route for undefined endpoints
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "404":
+          description: Route not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  message: "Route not found"
+                  path: "/api/nonexistent"
+    put:
+      tags: [System Status]
+      summary: 404 Handler
+      description: Catch-all route for undefined endpoints
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "404":
+          description: Route not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  message: "Route not found"
+                  path: "/api/nonexistent"
+    delete:
+      tags: [System Status]
+      summary: 404 Handler
+      description: Catch-all route for undefined endpoints
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "404":
+          description: Route not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                example:
+                  success: false
+                  message: "Route not found"
+                  path: "/api/nonexistent"
