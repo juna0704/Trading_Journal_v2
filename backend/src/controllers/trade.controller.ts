@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { tradeService } from "../services/trade.service";
 import { CreateTradeRequest, UpdateTradeRequest } from "../types/trade.types";
 import { AuthRequest } from "../types/auth.types";
+import { TradeStatus, TradeSide } from "../generated/prisma";
 
 export class TradeController {
   /**
@@ -14,37 +15,21 @@ export class TradeController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const userId = req.user!.userId; // From auth middleware
+      const userId = req.user!.userId;
       const tradeData: CreateTradeRequest = req.body;
 
       const trade = await tradeService.createTrade(userId, tradeData);
 
+      let warning: string | undefined;
+      if (req.body.strategyId == null) {
+        warning =
+          "This trade is not linked to any strategy. You can assign a strategy later to track performance.";
+      }
+
       res.status(201).json({
         success: true,
         data: trade,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Get all trades for the authenticated user
-   * GET /api/trades
-   */
-  async getTrades(
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const userId = req.user!.userId;
-
-      const trades = await tradeService.getTrades(userId);
-
-      res.status(200).json({
-        success: true,
-        data: trades,
+        meta: warning ? { warning } : undefined,
       });
     } catch (error) {
       next(error);
@@ -69,6 +54,60 @@ export class TradeController {
       res.status(200).json({
         success: true,
         data: trade,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get trades by pagination
+   * GET /api/trades/
+   */
+  async getTrades(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const userId = req.user!.userId;
+
+      const {
+        cursor,
+        limit,
+        status,
+        symbol,
+        side,
+        strategyId,
+        startDate,
+        endDate,
+      } = req.query;
+
+      const parsedStatus = Object.values(TradeStatus).includes(
+        status as TradeStatus
+      )
+        ? (status as TradeStatus)
+        : undefined;
+
+      const parsedSide = Object.values(TradeSide).includes(side as TradeSide)
+        ? (side as TradeSide)
+        : undefined;
+
+      const result = await tradeService.getTradesPaginated(userId, {
+        cursor: cursor as string,
+        limit: limit ? Number(limit) : undefined,
+        status: parsedStatus,
+        symbol: symbol as string,
+        side: parsedSide,
+        strategyId: strategyId === "null" ? null : (strategyId as string),
+        startDate: startDate as string,
+        endDate: endDate as string,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result.items,
+        pageInfo: result.pageInfo,
       });
     } catch (error) {
       next(error);

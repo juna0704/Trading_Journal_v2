@@ -3,15 +3,38 @@ import { tradeController } from "../../controllers/trade.controller";
 import { authenticate } from "../../middlewares/auth";
 import { validate } from "../../middlewares/validation";
 import {
-  tradeCreateSchema,
-  tradeUpdateSchema,
-  tradeIdSchema,
+  createTradeSchema,
+  listTradesSchema,
+  tradeByIdSchema,
+  updateTradeSchema,
 } from "../../validators/trade.validator";
 
 const router = Router();
 
 // All trade routes require authentication
 router.use(authenticate);
+
+/**
+ * @route   POST /api/trades
+ * @desc    Create a new trade
+ * @access  Private
+ */
+router.post(
+  "/",
+  validate(createTradeSchema),
+  tradeController.createTrade.bind(tradeController)
+);
+
+/**
+ * @route   GET /api/trades
+ * @desc    Get all trades for authenticated user
+ * @access  Private
+ */
+router.get(
+  "/",
+  validate(listTradesSchema),
+  tradeController.getTrades.bind(tradeController)
+);
 
 /**
  * @route   GET /api/trades/stats
@@ -21,31 +44,13 @@ router.use(authenticate);
 router.get("/stats", tradeController.getTradeStats.bind(tradeController));
 
 /**
- * @route   POST /api/trades
- * @desc    Create a new trade
- * @access  Private
- */
-router.post(
-  "/",
-  validate(tradeCreateSchema),
-  tradeController.createTrade.bind(tradeController)
-);
-
-/**
- * @route   GET /api/trades
- * @desc    Get all trades for authenticated user
- * @access  Private
- */
-router.get("/", tradeController.getTrades.bind(tradeController));
-
-/**
  * @route   GET /api/trades/:id
  * @desc    Get a single trade by ID
  * @access  Private
  */
 router.get(
   "/:id",
-  validate(tradeIdSchema),
+  validate(tradeByIdSchema),
   tradeController.getTradeById.bind(tradeController)
 );
 
@@ -56,8 +61,7 @@ router.get(
  */
 router.put(
   "/:id",
-  validate(tradeIdSchema),
-  validate(tradeUpdateSchema),
+  validate(updateTradeSchema),
   tradeController.updateTrade.bind(tradeController)
 );
 
@@ -68,7 +72,7 @@ router.put(
  */
 router.delete(
   "/:id",
-  validate(tradeIdSchema),
+  validate(tradeByIdSchema),
   tradeController.deleteTrade.bind(tradeController)
 );
 

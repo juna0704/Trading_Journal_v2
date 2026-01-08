@@ -3,6 +3,7 @@ import {
   CreateTradeRequest,
   UpdateTradeRequest,
   TradeResponse,
+  GetTradeParams,
 } from "../types/trade.types";
 import { AppError } from "../utils/errors";
 import prisma from "../config/database";
@@ -180,6 +181,66 @@ export class TradeService {
     }
 
     return this.toTradeResponse(trade);
+  }
+
+  /**
+   * Get Trades by pagination
+   */
+  async getTradesPaginated(userId: string, params: GetTradeParams) {
+    const {
+      cursor,
+      limit = 20,
+      status,
+      symbol,
+      strategyId,
+      side,
+      startDate,
+      endDate,
+    } = params;
+
+    const where: Prisma.TradeWhereInput = { userId };
+
+    // Advanced filters
+    if (status) {
+      where.status = status;
+    }
+    if (symbol) {
+      where.symbol = { contains: symbol, mode: "insensitive" };
+    }
+    if (side) {
+      where.side = side;
+    }
+    if (strategyId !== undefined) {
+      where.strategyId = strategyId;
+    }
+    if (startDate || endDate) {
+      where.entryTimestamp = {};
+      if (startDate) where.entryTimestamp.gte = new Date(startDate);
+      if (endDate) where.entryTimestamp.lte = new Date(endDate);
+    }
+
+    const trades = await prisma.trade.findMany({
+      where,
+      take: limit + 1, // fetch one extra to detect next page
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      orderBy: {
+        entryTimestamp: "desc",
+      },
+    });
+
+    const hasNextPage = trades.length > limit;
+    const items = hasNextPage ? trades.slice(0, limit) : trades;
+
+    return {
+      items: items.map((trade) => this.toTradeResponse(trade)),
+      pageInfo: {
+        nextCursor: hasNextPage ? items[items.length - 1].id : null,
+        hasNextPage,
+      },
+    };
   }
 
   /**

@@ -5,8 +5,12 @@ import { generalLimiter } from "./middlewares/rateLimit";
 import { env, logger } from "./config";
 import apiRoutes from "../src/routes";
 import { errorHandler } from "./middlewares/errorHandler";
+import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
+
+// Swagger docs
+setupSwagger(app);
 
 // Security Middleware
 app.use(helmet());

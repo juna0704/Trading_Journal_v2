@@ -69,3 +69,14 @@ export interface TradeResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface GetTradeParams {
+  cursor?: string;
+  limit?: number;
+  status?: TradeStatus;
+  symbol?: string;
+  strategyId?: string | null;
+  side?: TradeSide;
+  startDate?: string;
+  endDate?: string;
+}

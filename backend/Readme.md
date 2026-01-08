@@ -51,6 +51,9 @@ The Trading Journal is a comprehensive web application designed for traders to t
 
 ```
 trading-journal/
+|──docs/
+|   ├──API_DOCUMENTATION.md # Complete API documentation
+|   ├──openapi.yaml
 ├── src/
 │   ├── controllers/     # Request handlers
 │   ├── middleware/      # Auth, validation, error handling
@@ -63,13 +66,14 @@ trading-journal/
 ├── package.json         # Dependencies and scripts
 ├── tsconfig.json       # TypeScript configuration
 ├── prisma/schema.prisma # Database schema
-├── API_DOCUMENTATION.md # Complete API documentation
+├──
 └── README.md           # This file
 ```
 
 ## 📚 API Documentation
 
-Complete API documentation with detailed endpoint specifications, request/response examples, error codes, and frontend integration guidelines is available in the [API Documentation](../backend/Docs/API.md) file.
+Complete API documentation with detailed endpoint specifications, request/response examples, error codes, and frontend integration guidelines is available in the [API Documentation](../backend/docs/API_DOCUMENTATION.md) file.
+[SwaggerApi](../backend/docs/openapi.yaml)
 
 **Key Documentation Sections:**
 
