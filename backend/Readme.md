@@ -73,7 +73,7 @@ trading-journal/
 ## 📚 API Documentation
 
 Complete API documentation with detailed endpoint specifications, request/response examples, error codes, and frontend integration guidelines is available in the [API Documentation](../backend/docs/API_DOCUMENTATION.md) file.
-[SwaggerApi](../backend/docs/openapi.yaml)
+[SwaggerApi](../public-docs/openapi.yaml)
 
 **Key Documentation Sections:**
 
