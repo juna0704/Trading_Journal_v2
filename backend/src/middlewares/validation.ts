@@ -21,16 +21,26 @@ export const validate = (schema: ZodTypeAny) => {
 
       next();
     } catch (error) {
+      console.log("===== VALIDATION MIDDLEWARE HIT =====");
+
+      console.log("REQ BODY:", JSON.stringify(req.body, null, 2));
+      console.log("REQ QUERY:", JSON.stringify(req.query, null, 2));
+      console.log("REQ PARAMS:", JSON.stringify(req.params, null, 2));
+
       if (error instanceof ZodError) {
+        console.log("ZOD ERRORS RAW:", error.errors);
+
         const errors = error.errors.map((err) => ({
           field: err.path.join("."),
           message: err.message,
         }));
 
-        next(new AppError(400, "VALIDATION_ERROR", "validation failed"));
-      } else {
-        next(error);
+        console.log("ZOD ERRORS MAPPED:", errors);
       }
+
+      console.log("===== END VALIDATION ERROR =====");
+
+      next(error);
     }
   };
 };

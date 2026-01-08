@@ -33,9 +33,9 @@ info:
 servers:
   - url: http://localhost:5000
     description: Development environment
-  - url: https://api-staging.tradingjournal.com
+  - url: https://**************
     description: Staging environment
-  - url: https://api.tradingjournal.com
+  - url: https://***************
     description: Production environment
 
 tags:
@@ -1457,90 +1457,3 @@ paths:
                     timestamp: "2026-01-07T07:30:00.000Z"
                     uptime: 86400.25
                     environment: "development"
-
-  # Catch-all for undefined routes
-  /{path+}:
-    get:
-      tags: [System Status]
-      summary: 404 Handler
-      description: Catch-all route for undefined endpoints
-      parameters:
-        - name: path
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "404":
-          description: Route not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponse"
-                example:
-                  success: false
-                  message: "Route not found"
-                  path: "/api/nonexistent"
-    post:
-      tags: [System Status]
-      summary: 404 Handler
-      description: Catch-all route for undefined endpoints
-      parameters:
-        - name: path
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "404":
-          description: Route not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponse"
-                example:
-                  success: false
-                  message: "Route not found"
-                  path: "/api/nonexistent"
-    put:
-      tags: [System Status]
-      summary: 404 Handler
-      description: Catch-all route for undefined endpoints
-      parameters:
-        - name: path
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "404":
-          description: Route not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponse"
-                example:
-                  success: false
-                  message: "Route not found"
-                  path: "/api/nonexistent"
-    delete:
-      tags: [System Status]
-      summary: 404 Handler
-      description: Catch-all route for undefined endpoints
-      parameters:
-        - name: path
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "404":
-          description: Route not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponse"
-                example:
-                  success: false
-                  message: "Route not found"
-                  path: "/api/nonexistent"

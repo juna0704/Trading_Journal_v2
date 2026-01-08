@@ -21,7 +21,7 @@ export class TradeController {
       const trade = await tradeService.createTrade(userId, tradeData);
 
       let warning: string | undefined;
-      if (req.body.strategyId == null) {
+      if (!trade.strategyId) {
         warning =
           "This trade is not linked to any strategy. You can assign a strategy later to track performance.";
       }
@@ -140,7 +140,7 @@ export class TradeController {
   }
 
   /**
-   * Delete a trade
+   * SoftDelete a trade
    * DELETE /api/trades/:id
    */
   async deleteTrade(
@@ -152,11 +152,48 @@ export class TradeController {
       const userId = req.user!.userId;
       const tradeId = req.params.id;
 
-      await tradeService.deleteTrade(userId, tradeId);
+      await tradeService.softDeleteTrade(userId, tradeId);
 
       res.status(200).json({
         success: true,
         message: "Trade deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Restore Trade
+   */
+  async restoreTrade(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      const tradeId = req.params.id;
+
+      await tradeService.restoreTrade(userId, tradeId);
+
+      res.status(200).json({
+        success: true,
+        message: "Trade restored",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get Delete Trade(Restore)
+   */
+  async getDeletedTrades(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+
+      const trades = await tradeService.getDeletedTrades(userId);
+
+      res.status(200).json({
+        success: true,
+        data: trades,
       });
     } catch (error) {
       next(error);
@@ -185,6 +222,30 @@ export class TradeController {
       next(error);
     }
   }
+
+  /**
+   * Permanently delete a trade (ADMIN only)
+   * DELETE /api/trades/:id/permanent
+   */
+  // async permanentDeleteTrade(
+  //   req: AuthRequest,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> {
+  //   try {
+  //     const tradeId = req.params.id;
+  //     const role = req.user!.role; // ADMIN | SUPER_ADMIN | USER
+
+  //     await tradeService.permanentDeleteTrade(tradeId, role);
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Trade permanently deleted",
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }
 
 export const tradeController = new TradeController();

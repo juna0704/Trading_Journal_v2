@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { tradeController } from "../../controllers/trade.controller";
-import { authenticate } from "../../middlewares/auth";
+import { authenticate, requireAdmin } from "../../middlewares/auth";
 import { validate } from "../../middlewares/validation";
 import {
   createTradeSchema,
@@ -75,5 +75,14 @@ router.delete(
   validate(tradeByIdSchema),
   tradeController.deleteTrade.bind(tradeController)
 );
+
+router.post("/:id/restore", tradeController.restoreTrade);
+
+// router.delete(
+//   "/:id/permanent",
+//   authenticate,
+//   requireAdmin, // middleware
+//   tradeController.permanentDeleteTrade.bind(tradeController)
+// );
 
 export default router;
